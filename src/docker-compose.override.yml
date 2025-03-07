@@ -3,10 +3,12 @@ version: '3.4'
 services:
   catalogdb:
     container_name: catalogdb
+    image: postgres:17
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=root
       - POSTGRES_DB=CatalogDb
+      - POSTGRES_HOST_AUTH_METHOD=trust
     restart: always
     ports:
         - "5432:5432"
@@ -15,15 +17,31 @@ services:
       
   basketdb:
     container_name: basketdb
+    image: postgres:17
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=root
       - POSTGRES_DB=BasketDb
+      - POSTGRES_HOST_AUTH_METHOD=trust 
     restart: always
     ports:
         - "5433:5432"
     volumes:
       - postgres_basket:/var/lib/postgresql/data/ 
+
+  userdb:
+    container_name: userdb
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=UserDb
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_user:/var/lib/postgresql/data/
 
   distributedcache:
     container_name: distributedcache
@@ -51,12 +69,27 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  user.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=userdb;Port=5432;Database=UserDb;User Id=postgres;Password=root;Include Error Detail=true
+    depends_on:
+      - userdb
+    ports:
+      - "6006:8080"
+      - "6066:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
   catalog.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=postgres;Include Error Detail=true
+      - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=root;Include Error Detail=true
     depends_on:
       - catalogdb
     ports:
@@ -71,7 +104,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=postgres;Include Error Detail=true
+      - ConnectionStrings__Database=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=root;Include Error Detail=true
       - ConnectionStrings__Redis=distributedcache:6379
       - GrpcSettings__DiscountUrl=https://discount.grpc:8081
       - MessageBroker__Host=amqp://ecommerce-mq:5672
@@ -131,6 +164,7 @@ services:
       - catalog.api
       - basket.api
       - ordering.api
+      - user.api
     ports:
       - "6004:8080"
       - "6064:8081"

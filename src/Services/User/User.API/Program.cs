@@ -11,6 +11,9 @@ builder.Services.AddMarten(options =>
     options.Schema.For<User.API.Models.User>();
 });
 
+if (builder.Environment.IsDevelopment())
+    builder.Services.InitializeMartenWith<UserInitialData>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -30,12 +33,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddCarter();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var store = scope.ServiceProvider.GetRequiredService<IDocumentStore>();
-    SeedData.Initialize(store);
-}
 
 app.UseAuthentication();
 app.UseAuthorization();
