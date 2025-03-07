@@ -1,8 +1,16 @@
 using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "http://user-api:8080";
+        options.Audience = builder.Configuration["Jwt:Audience"];
+    });
+builder.Services.AddAuthorization();
 // Add services to the container.
 var assembly = typeof(Program).Assembly;
 builder.Services.AddMediatR(config =>
@@ -30,6 +38,8 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 // Configure the HTTP request pipeline.
 app.MapCarter();
 

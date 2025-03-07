@@ -2,10 +2,18 @@ using Discount.Grpc;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using BuildingBlocks.Messaging.MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "http://user-api:8080";
+        options.Audience = builder.Configuration["Jwt:Audience"];
+    });
+builder.Services.AddAuthorization();
 
 //Application Services
 var assembly = typeof(Program).Assembly;
@@ -61,6 +69,8 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
 // Configure the HTTP request pipeline.
 app.MapCarter();
 app.UseExceptionHandler(options => { });
