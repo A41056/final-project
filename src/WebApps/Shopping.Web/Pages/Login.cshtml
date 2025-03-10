@@ -1,0 +1,28 @@
+﻿@page
+@model Shopping.Web.Models.User.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<h2>Login</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="LoginRequest.Email">Email</label>
+        <input asp-for="LoginRequest.Email" class="form-control" />
+        <span asp-validation-for="LoginRequest.Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="LoginRequest.Password">Password</label>
+        <input asp-for="LoginRequest.Password" type="password" class="form-control" />
+        <span asp-validation-for="LoginRequest.Password" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+<p>Don't have an account? <a asp-page="/Register">Register here</a></p>

@@ -15,7 +15,7 @@ public class UserEndpoint : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         // Đăng ký người dùng
-        app.MapPost("/register", async (RegisterDto dto, IDocumentSession session) =>
+        app.MapPost("/Register", async (RegisterDto dto, IDocumentSession session) =>
         {
             var existingUser = await session.Query<Models.User>().FirstOrDefaultAsync(u => u.Email == dto.Email || u.Username == dto.Username);
             if (existingUser != null) return Results.BadRequest("User already exists");
@@ -40,7 +40,7 @@ public class UserEndpoint : ICarterModule
         });
 
         // Đăng nhập
-        app.MapPost("/login", async (LoginDto dto, IDocumentSession session, IConfiguration config) =>
+        app.MapPost("/Login", async (LoginDto dto, IDocumentSession session, IConfiguration config) =>
         {
             var user = await session.Query<Models.User>().FirstOrDefaultAsync(u => u.Email == dto.Email && u.IsActive);
             if (user == null || !HashHelper.VerifyPassword(dto.Password, user.PasswordHash, user.PasswordSalt))

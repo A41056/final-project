@@ -1,7 +1,25 @@
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Thêm xác thực Cookie
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Login";
+        options.LogoutPath = "/Logout";
+    });
 
 builder.Services.AddRefitClient<ICatalogService>()
     .ConfigureHttpClient(c =>
@@ -13,11 +31,18 @@ builder.Services.AddRefitClient<IBasketService>()
     {
         c.BaseAddress = new Uri(builder.Configuration["ApiSettings:GatewayAddress"]!);
     });
+builder.Services.AddRefitClient<IUserService>()
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri(builder.Configuration["ApiSettings:GatewayAddress"]!);
+    });
 builder.Services.AddRefitClient<IOrderingService>()
     .ConfigureHttpClient(c =>
     {
         c.BaseAddress = new Uri(builder.Configuration["ApiSettings:GatewayAddress"]!);
     });
+
+builder.Services.AddTransient<AuthTokenHandler>();
 
 var app = builder.Build();
 
@@ -34,6 +59,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
