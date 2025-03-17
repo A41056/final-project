@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -29,11 +29,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost5173", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Chỉ cho phép origin này
+              .AllowAnyMethod() // Cho phép tất cả HTTP methods (GET, POST, PUT, v.v.)
+              .AllowAnyHeader() // Cho phép tất cả headers
+              .AllowCredentials(); // Nếu cần gửi cookie hoặc auth credentials
+    });
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();
 
 var app = builder.Build();
 
+app.UseCors("AllowLocalhost5173");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapCarter();

@@ -59,7 +59,21 @@ public class UserEndpoint : ICarterModule
             await session.SaveChangesAsync();
 
             var token = GenerateJwtToken(user, config);
-            return Results.Ok(new { Token = token });
+            var userDto = new
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Gender = user.Gender,
+                Age = user.Age,
+                RoleId = user.RoleId,
+                CreatedDate = user.CreatedDate,
+                ModifiedDate = user.ModifiedDate
+            };
+
+            return Results.Ok(new { Token = token, User = userDto });
         });
 
         // Thêm người dùng (yêu cầu quyền admin)
@@ -117,6 +131,59 @@ public class UserEndpoint : ICarterModule
             session.Store(user);
             await session.SaveChangesAsync();
             return Results.Ok("User deactivated successfully");
+        }).RequireAuthorization();
+
+        // Lấy thông tin người dùng theo ID
+        app.MapGet("/users/{id}", async (Guid id, IDocumentSession session) =>
+        {
+            var user = await session.LoadAsync<Models.User>(id);
+            if (user == null || !user.IsActive) return Results.NotFound();
+
+            // Trả về DTO để không lộ thông tin nhạy cảm như PasswordHash, PasswordSalt
+            var userDto = new
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Gender = user.Gender,
+                Age = user.Age,
+                RoleId = user.RoleId,
+                CreatedDate = user.CreatedDate,
+                ModifiedDate = user.ModifiedDate
+            };
+
+            return Results.Ok(userDto);
+        }).RequireAuthorization();
+
+        // Lấy danh sách người dùng
+        app.MapGet("/users", async (IDocumentSession session, HttpContext context) =>
+        {
+            // Kiểm tra quyền admin (tùy chọn)
+            var roleId = context.User.FindFirstValue("roleId");
+            if (roleId != "admin-role-id") return Results.Forbid(); // Giả sử "admin-role-id" là RoleId của admin
+
+            var users = await session.Query<Models.User>()
+                                    .Where(u => u.IsActive)
+                                    .ToListAsync();
+
+            // Chuyển thành DTO để trả về
+            var userDtos = users.Select(user => new
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Gender = user.Gender,
+                Age = user.Age,
+                RoleId = user.RoleId,
+                CreatedDate = user.CreatedDate,
+                ModifiedDate = user.ModifiedDate
+            });
+
+            return Results.Ok(userDtos);
         }).RequireAuthorization();
     }
 
