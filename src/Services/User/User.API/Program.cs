@@ -33,7 +33,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost5173", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Chỉ cho phép origin này
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // Chỉ cho phép origin này
               .AllowAnyMethod() // Cho phép tất cả HTTP methods (GET, POST, PUT, v.v.)
               .AllowAnyHeader() // Cho phép tất cả headers
               .AllowCredentials(); // Nếu cần gửi cookie hoặc auth credentials

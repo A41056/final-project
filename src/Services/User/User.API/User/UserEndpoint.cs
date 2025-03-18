@@ -102,7 +102,7 @@ public class UserEndpoint : ICarterModule
         }).RequireAuthorization();
 
         // Sửa thông tin người dùng
-        app.MapPut("/users/{id}", async (Guid id, UpdateUserDto dto, IDocumentSession session) =>
+         app.MapPut("/users/{id}", async (Guid id, UpdateUserDto dto, IDocumentSession session) =>
         {
             var user = await session.LoadAsync<Models.User>(id);
             if (user == null || !user.IsActive) return Results.NotFound();
