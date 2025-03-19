@@ -43,6 +43,20 @@ services:
     volumes:
       - postgres_user:/var/lib/postgresql/data/
 
+  reviewdb:
+    container_name: reviewdb
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=ReviewDb
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_review:/var/lib/postgresql/data/
+
   distributedcache:
     container_name: distributedcache
     restart: always
@@ -80,6 +94,21 @@ services:
     ports:
       - "6006:8080"
       - "6066:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  review.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=reviewdb;Port=5432;Database=ReviewDb;User Id=postgres;Password=root;Include Error Detail=true
+    depends_on:
+      - reviewdb
+    ports:
+      - "6007:8080"
+      - "6067:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -165,6 +194,7 @@ services:
       - basket.api
       - ordering.api
       - user.api
+      - review.api
     ports:
       - "6004:8080"
       - "6064:8081"
