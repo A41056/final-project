@@ -26,6 +26,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.RequireHttpsMetadata = false;
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("*") // Chỉ cho phép origin này
+              .AllowAnyMethod() // Cho phép tất cả HTTP methods (GET, POST, PUT, v.v.)
+              .AllowAnyHeader(); // Cho phép tất cả headers
+    });
+});
+
 // Thêm Authorization với chính sách mặc định
 builder.Services.AddAuthorization(options =>
 {
@@ -59,6 +69,17 @@ builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Request: {context.Request.Method} {context.Request.Path}");
+    var headers = context.Request.Headers["Authorization"];
+    Console.WriteLine($"Authorization Header: {headers}");
+    await next(context);
+    Console.WriteLine($"Response: {context.Response.StatusCode}");
+});
 
 // Middleware theo thứ tự đúng
 app.UseRouting();
