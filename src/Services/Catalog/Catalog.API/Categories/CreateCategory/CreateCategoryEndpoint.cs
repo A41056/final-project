@@ -7,7 +7,11 @@ public class CreateCategoryEndpoint : ICarterModule
         app.MapPost("/categories", async (CreateCategoryCommand command, ISender sender) =>
         {
             var result = await sender.Send(command);
-            return Results.Created($"/categories/{result.Id}", result);
+            return Results.Created("/categories", new
+            {
+                createdIds = result.CreatedIds,
+                duplicates = result.Duplicates
+            });
         })
         .WithName("CreateCategory")
         .RequireAuthorization()

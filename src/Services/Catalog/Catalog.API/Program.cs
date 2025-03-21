@@ -1,4 +1,5 @@
-﻿using HealthChecks.UI.Client;
+﻿using Catalog.API.Middleware;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -30,9 +31,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("*") // Chỉ cho phép origin này
-              .AllowAnyMethod() // Cho phép tất cả HTTP methods (GET, POST, PUT, v.v.)
-              .AllowAnyHeader(); // Cho phép tất cả headers
+        policy.WithOrigins("http://localhost:5173") // Origin của frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -64,7 +66,10 @@ builder.Services.AddMarten(opts =>
 if (builder.Environment.IsDevelopment())
     builder.Services.InitializeMartenWith<CatalogInitialData>();
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<CatalogCustomExceptionHandler>();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
 
@@ -81,6 +86,7 @@ app.Use(async (context, next) =>
     Console.WriteLine($"Response: {context.Response.StatusCode}");
 });
 
+app.UseExceptionHandler();
 // Middleware theo thứ tự đúng
 app.UseRouting();
 app.UseAuthentication();
@@ -88,7 +94,6 @@ app.UseAuthorization();
 
 app.MapCarter(); // MapCarter sẽ áp dụng chính sách mặc định
 
-app.UseExceptionHandler(options => { });
 app.UseHealthChecks("/health", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
