@@ -57,6 +57,20 @@ services:
     volumes:
       - postgres_review:/var/lib/postgresql/data/
 
+  filedb:
+    container_name: filedb
+    image: postgres:17
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=FileDb
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    restart: always
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_file:/var/lib/postgresql/data/
+
   distributedcache:
     container_name: distributedcache
     restart: always
@@ -109,6 +123,21 @@ services:
     ports:
       - "6007:8080"
       - "6067:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  file.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Server=filedb;Port=5432;Database=FileDb;User Id=postgres;Password=root;Include Error Detail=true
+    depends_on:
+      - filedb
+    ports:
+      - "6010:8080"
+      - "6070:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -195,6 +224,7 @@ services:
       - ordering.api
       - user.api
       - review.api
+      - file.api
     ports:
       - "6004:8080"
       - "6064:8081"

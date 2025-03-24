@@ -13,6 +13,9 @@ services:
   reviewdb:
     image: postgres
 
+  filedb:
+    image: postgres
+
   distributedcache:
     image: redis
 
@@ -46,6 +49,12 @@ services:
       context: .
       dockerfile: Services/Review/Review.API/Dockerfile
 
+  file.api:
+    image: ${DOCKER_REGISTRY-}fileapi
+    build:
+      context: .
+      dockerfile: Services/Media/Media.API/Dockerfile
+
   discount.grpc:
     image: ${DOCKER_REGISTRY-}discountgrpc
     build:
@@ -74,4 +83,5 @@ volumes:
   postgres_catalog:
   postgres_basket:
   postgres_user:
-  postgres_review:  
+  postgres_review:
+  postgres_file:
