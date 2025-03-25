@@ -1,7 +1,6 @@
-﻿using Amazon.S3.Model;
-using Amazon.S3;
-using Media.API.Service.Interfaces;
-using Amazon;
+﻿using Media.API.Service.Interfaces;
+using Minio;
+using Minio.DataModel.Args;
 
 namespace Media.API.Service.Impls;
 
@@ -9,23 +8,20 @@ public class CloudflareStorageService : IStorageService
 {
     private readonly ILogger<CloudflareStorageService> _logger;
     private readonly string _bucketName;
-    private readonly AmazonS3Client _s3Client;
+    private readonly IMinioClient _minioClient;
 
-    public CloudflareStorageService(ILogger<CloudflareStorageService> logger, Microsoft.Extensions.Configuration.IConfiguration configuration)
+    public CloudflareStorageService(ILogger<CloudflareStorageService> logger, IConfiguration configuration)
     {
         _logger = logger;
 
         var cloudflareSettings = configuration.GetSection("CloudflareSetting").Get<CloudflareSetting>();
 
-        AWSConfigsS3.UseSignatureVersion4 = true;
-        _s3Client = new AmazonS3Client(
-            cloudflareSettings.AccessKey,
-            cloudflareSettings.SecretKey,
-            new AmazonS3Config
-            {
-                ServiceURL = $"https://{cloudflareSettings.AccountId}.r2.cloudflarestorage.com",
-                SignatureVersion = "4"
-            });
+        _minioClient = new MinioClient()
+            .WithEndpoint($"{cloudflareSettings.AccountId}.r2.cloudflarestorage.com")
+            .WithCredentials(cloudflareSettings.AccessKey.Trim(), cloudflareSettings.SecretKey.Trim())
+            .WithSSL()
+            .Build();
+
         _bucketName = cloudflareSettings.BucketName;
     }
 
@@ -34,30 +30,41 @@ public class CloudflareStorageService : IStorageService
         try
         {
             info.Stream.Position = 0;
-
             var mimeType = GetMimeTypeFromExtension(info.FileName);
 
-            var request = new PutObjectRequest
+            using (var memoryStream = new MemoryStream())
             {
-                BucketName = _bucketName,
-                Key = "test.png", // Không sử dụng folder
-                InputStream = info.Stream,
-                ContentType = mimeType,
-                DisablePayloadSigning = true
-            };
+                await info.Stream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
 
-            var response = await _s3Client.PutObjectAsync(request);
+                var putArgs = new PutObjectArgs()
+                    .WithBucket(_bucketName)
+                    .WithObject(info.FileName)
+                    .WithStreamData(memoryStream)
+                    .WithObjectSize(memoryStream.Length)
+                    .WithContentType(mimeType);
 
-            if (response.HttpStatusCode != System.Net.HttpStatusCode.OK && response.HttpStatusCode != System.Net.HttpStatusCode.Accepted)
-            {
-                throw new Exception("Upload to Cloudflare R2 failed");
+                await _minioClient.PutObjectAsync(putArgs);
+                _logger.LogInformation("Successfully uploaded {FileName} to bucket {BucketName}", info.FileName, _bucketName);
             }
 
-            return GenerateSignedUrl(info.FileName);
+            var presignedArgs = new PresignedGetObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(info.FileName)
+                .WithExpiry(60 * 60);
+
+            string signedUrl = await _minioClient.PresignedGetObjectAsync(presignedArgs);
+            return signedUrl;
+        }
+        catch (Minio.Exceptions.MinioException minioEx)
+        {
+            _logger.LogError("MinIO Error - Message: {Message}, Response: {Response}",
+                minioEx.Message, minioEx.Response);
+            throw;
         }
         catch (Exception e)
         {
-            _logger.LogError("Error uploading file to Cloudflare R2: " + e.Message);
+            _logger.LogError("Error uploading file: {Message}", e.Message);
             throw;
         }
     }
@@ -66,11 +73,16 @@ public class CloudflareStorageService : IStorageService
     {
         try
         {
-            await _s3Client.DeleteObjectAsync(_bucketName, fileName);
+            var args = new RemoveObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(fileName);
+
+            await _minioClient.RemoveObjectAsync(args);
+            _logger.LogInformation("Successfully deleted file {FileName} from bucket {BucketName}", fileName, _bucketName);
         }
         catch (Exception e)
         {
-            _logger.LogError("Error deleting file in Cloudflare R2: " + e.Message);
+            _logger.LogError("Error deleting file in Cloudflare R2: {Message}", e.Message);
             throw;
         }
     }
@@ -79,8 +91,12 @@ public class CloudflareStorageService : IStorageService
     {
         try
         {
-            var obj = _s3Client.GetObjectMetadataAsync(_bucketName, path).Result;
-            return obj != null;
+            var args = new StatObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(path);
+
+            var stat = _minioClient.StatObjectAsync(args).Result;
+            return stat != null && stat.Size >= 0;
         }
         catch
         {
@@ -92,14 +108,21 @@ public class CloudflareStorageService : IStorageService
     {
         try
         {
-            var obj = await _s3Client.GetObjectAsync(_bucketName, fileName);
             using var memoryStream = new MemoryStream();
-            await obj.ResponseStream.CopyToAsync(memoryStream);
+            var args = new GetObjectArgs()
+                .WithBucket(_bucketName)
+                .WithObject(fileName)
+                .WithCallbackStream(async stream =>
+                {
+                    await stream.CopyToAsync(memoryStream);
+                });
+
+            await _minioClient.GetObjectAsync(args);
             return memoryStream.ToArray();
         }
         catch (Exception e)
         {
-            _logger.LogError("Error getting bytes from Cloudflare R2: " + e.Message);
+            _logger.LogError("Error getting bytes from Cloudflare R2: {Message}", e.Message);
             throw;
         }
     }
@@ -136,7 +159,7 @@ public class CloudflareStorageService : IStorageService
 public class CloudflareSetting
 {
     public string AccountId { get; set; }
+    public string BucketName { get; set; }
     public string AccessKey { get; set; }
     public string SecretKey { get; set; }
-    public string BucketName { get; set; }
 }

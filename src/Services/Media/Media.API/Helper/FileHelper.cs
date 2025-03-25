@@ -1,5 +1,6 @@
 ﻿using Media.API.Enum;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Security.Cryptography;
 
 namespace Media.API.Helper;
 
@@ -74,5 +75,42 @@ public static class FileHelper
         segments[^1] = Uri.EscapeDataString(segments[^1]);
 
         return string.Join("/", segments);
+    }
+
+    public static string ComputeSignature(string secretKey, string date, string region, string service, string stringToSign)
+    {
+        var kSecret = System.Text.Encoding.UTF8.GetBytes("AWS4" + secretKey);
+        var kDate = HmacSha256(kSecret, date);
+        var kRegion = HmacSha256(kDate, region);
+        var kService = HmacSha256(kRegion, service);
+        var kSigning = HmacSha256(kService, "aws4_request");
+        return HmacSha256Hex(kSigning, stringToSign);
+    }
+
+    public static byte[] HmacSha256(byte[] key, string data)
+    {
+        using (var hmac = new HMACSHA256(key))
+        {
+            return hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(data));
+        }
+    }
+
+    public static string HmacSha256Hex(byte[] key, string data)
+    {
+        using (var hmac = new HMACSHA256(key))
+        {
+            byte[] hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(data));
+            return BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
+    }
+
+    public static string ComputeSha256(string input)
+    {
+        using (var sha256 = SHA256.Create())
+        {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(input);
+            byte[] hash = sha256.ComputeHash(bytes);
+            return BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
     }
 }
