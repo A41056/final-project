@@ -13,7 +13,7 @@ public class CatalogCustomExceptionHandler : IExceptionHandler
         if (httpContext.Response.HasStarted)
         {
             Console.WriteLine("Response has already started, cannot modify");
-            return false; // Không thể xử lý nếu response đã bắt đầu
+            return false;
         }
         httpContext.Response.ContentType = "application/json";
         switch (exception)

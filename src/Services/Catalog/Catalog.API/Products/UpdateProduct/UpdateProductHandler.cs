@@ -1,7 +1,7 @@
 ﻿
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, string ImageFile, decimal Price)
+public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, decimal Price)
     : ICommand<UpdateProductResult>;
 public record UpdateProductResult(bool IsSuccess);
 
@@ -36,7 +36,7 @@ internal class UpdateProductCommandHandler
         product.Name = command.Name;
         product.CategoryIds = command.Category;
         product.Description = command.Description;
-        product.ImageFile = command.ImageFile;
+        product.ImageFiles = command.ImageFiles;
         product.Price = command.Price;
 
         session.Update(product);
