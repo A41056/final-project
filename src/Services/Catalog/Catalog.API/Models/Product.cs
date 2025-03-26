@@ -14,6 +14,14 @@
 
 public class ProductVariant
 {
-    public string Name { get; set; } = string.Empty;
+    public List<VariantProperty> Properties { get; set; } = new();
     public decimal Price { get; set; }
+    public int StockCount { get; set; }
+}
+
+public class VariantProperty
+{
+    public string Type { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public string? Image { get; set; }
 }

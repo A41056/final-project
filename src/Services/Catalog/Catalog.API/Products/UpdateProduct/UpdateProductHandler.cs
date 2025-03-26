@@ -1,7 +1,8 @@
-﻿
+﻿using Catalog.API.Products.CreateProduct;
+
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, decimal Price)
+public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, bool IsHot, bool IsActive, List<ProductVariant> Variants)
     : ICommand<UpdateProductResult>;
 public record UpdateProductResult(bool IsSuccess);
 
@@ -10,13 +11,9 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
     public UpdateProductCommandValidator()
     {
         RuleFor(command => command.Id).NotEmpty().WithMessage("Product ID is required");
-
-        RuleFor(command => command.Name)
-            .NotEmpty().WithMessage("Name is required")
-            .Length(2, 150).WithMessage("Name must be between 2 and 150 characters");
-
-        RuleFor(command => command.Price)
-            .GreaterThan(0).WithMessage("Price must be greater than 0");
+        RuleFor(command => command.Name).NotEmpty().WithMessage("Name is required");
+        RuleFor(command => command.Variants).NotEmpty().WithMessage("At least one variant is required");
+        RuleForEach(command => command.Variants).SetValidator(new ProductVariantValidator());
     }
 }
 
@@ -37,7 +34,10 @@ internal class UpdateProductCommandHandler
         product.CategoryIds = command.Category;
         product.Description = command.Description;
         product.ImageFiles = command.ImageFiles;
-        product.Price = command.Price;
+        product.IsHot = command.IsHot;
+        product.IsActive = command.IsActive;
+        product.Variants = command.Variants;
+        product.Modified = DateTime.UtcNow;
 
         session.Update(product);
         await session.SaveChangesAsync(cancellationToken);

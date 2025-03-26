@@ -1,14 +1,13 @@
-﻿
-namespace Catalog.API.Products.UpdateProduct;
+﻿namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductRequest(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, decimal Price);
+public record UpdateProductRequest(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, bool IsHot, bool IsActive, List<ProductVariant> Variants);
 public record UpdateProductResponse(bool IsSuccess);
 
-public class UpdateCategoryEndpoint : ICarterModule
+public class UpdateProductEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPut("/products", 
+        app.MapPut("/products",
             async (UpdateProductRequest request, ISender sender) =>
             {
                 var command = request.Adapt<UpdateProductCommand>();
