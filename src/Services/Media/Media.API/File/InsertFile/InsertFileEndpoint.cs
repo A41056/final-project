@@ -26,7 +26,11 @@ public class InsertFileEndpoint : ICarterModule
             var command = new InsertFileCommand(model);
             await sender.Send(command);
 
-            return Results.Created($"/files/{model.Id}", new { fileId = model.Id });
+            return Results.Created($"/files/{model.Id}", new
+            {
+                fileId = model.Id,
+                storageLocation = model.StorageLocation
+            });
         })
         .WithName("InsertFile")
         .RequireAuthorization()

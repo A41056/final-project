@@ -2,6 +2,7 @@
 using Media.API.Service.Interfaces;
 
 namespace Media.API.File.InsertFile;
+
 public record InsertFileCommand(FileInsertModel Model) : ICommand<Unit>;
 
 internal class InsertFileCommandHandler : ICommandHandler<InsertFileCommand, Unit>
@@ -43,9 +44,10 @@ internal class InsertFileCommandHandler : ICommandHandler<InsertFileCommand, Uni
         FileInsertModel uploadedFileInfo;
         try
         {
+            var itemId = command.Model.ProductId ?? Guid.NewGuid();
             uploadedFileInfo = await _fileUploaderService.FileUploadAsync(
                 command.Model.File,
-                command.Model.ProductId.GetValueOrDefault(),
+                itemId,
                 fileType.Identifier);
         }
         catch (Exception ex)
@@ -54,20 +56,21 @@ internal class InsertFileCommandHandler : ICommandHandler<InsertFileCommand, Uni
             throw new InvalidOperationException("File upload failed.", ex);
         }
 
+        var fileId = Guid.NewGuid();
         var file = new Model.File
         {
-            Id = Guid.NewGuid(),
+            Id = fileId,
             FileName = uploadedFileInfo.FileName ?? command.Model.FileName ?? command.Model.File.FileName,
             Extension = uploadedFileInfo.Extension ?? command.Model.Extension ?? Path.GetExtension(command.Model.File.FileName),
-            StorageLocation = uploadedFileInfo.StorageLocation ?? command.Model.StorageLocation,
+            StorageLocation = uploadedFileInfo.StorageLocation,
             DisplayName = command.Model.DisplayName ?? command.Model.FileName ?? command.Model.File.FileName,
             FileTypeId = command.Model.FileTypeId,
             UserId = command.Model.UserId,
             ProductId = command.Model.ProductId,
-            ThumbnailStorageLocation = uploadedFileInfo.ThumbnailStorageLocation ?? command.Model.ThumbnailStorageLocation,
-            SmallStorageLocation = uploadedFileInfo.SmallStorageLocation ?? command.Model.SmallStorageLocation,
-            MediumStorageLocation = uploadedFileInfo.MediumStorageLocation ?? command.Model.MediumStorageLocation,
-            LargeStorageLocation = uploadedFileInfo.LargeStorageLocation ?? command.Model.LargeStorageLocation,
+            ThumbnailStorageLocation = uploadedFileInfo.ThumbnailStorageLocation,
+            SmallStorageLocation = uploadedFileInfo.SmallStorageLocation,
+            MediumStorageLocation = uploadedFileInfo.MediumStorageLocation,
+            LargeStorageLocation = uploadedFileInfo.LargeStorageLocation,
             ImageOrder = command.Model.ImageOrder,
             FileSize = uploadedFileInfo.FileSize > 0 ? uploadedFileInfo.FileSize : command.Model.File.Length,
             IsActive = command.Model.IsActive || true,
@@ -82,7 +85,6 @@ internal class InsertFileCommandHandler : ICommandHandler<InsertFileCommand, Uni
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to save file metadata to database. Rolling back upload.");
-
             try
             {
                 await _fileUploaderService.DeleteFileAsync(file.StorageLocation);
@@ -91,9 +93,11 @@ internal class InsertFileCommandHandler : ICommandHandler<InsertFileCommand, Uni
             {
                 _logger.LogError(rollbackEx, "Failed to rollback file upload on Cloudflare R2.");
             }
-
             throw new InvalidOperationException("Failed to save file metadata.", ex);
         }
+
+        command.Model.Id = fileId;
+        command.Model.StorageLocation = file.StorageLocation;
 
         _logger.LogInformation("File {FileId} uploaded and saved successfully.", file.Id);
         return Unit.Value;

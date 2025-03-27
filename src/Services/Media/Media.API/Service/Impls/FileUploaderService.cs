@@ -32,37 +32,32 @@ public class FileUploaderService : IFileUploaderService
 
         try
         {
-            // Step 1: Lấy FileType qua query
             var fileTypeQuery = new GetFileTypeByIdentifierQuery(identifier);
             var fileType = await _sender.Send(fileTypeQuery);
             ValidateFile(file, fileType);
 
-            // Step 2: Tạo key cho Cloudflare R2
             string originFileName = Path.GetFileNameWithoutExtension(file.FileName);
             string extension = Path.GetExtension(file.FileName);
             string prefix = BuildStoragePrefix(fileType.DefaultStorageLocation, itemId);
             string fileName = BuildFileName(fileType.FileNamePattern, itemId, originFileName, extension);
-            string fullKey = $"{prefix}/{fileName}"; // Ví dụ: media/images/2025/03/itemId_file_123456.jpg
+            string fullKey = $"{prefix}/{fileName}";
 
-            // Step 3: Upload file lên Cloudflare R2
             using var stream = new MemoryStream();
             await file.CopyToAsync(stream);
             stream.Position = 0;
 
             var uri = await _storageService.Upload(new StorageInfo
             {
-                FileName = fullKey, // Dùng fullKey thay vì tách folder và file
+                FileName = fullKey,
                 IsPublic = true,
                 Stream = stream
             });
-
-            _logger.LogInformation("File {FullKey} uploaded successfully to {Uri}", fullKey, uri);
 
             return new FileInsertModel
             {
                 FileName = fileName,
                 DisplayName = originFileName,
-                StorageLocation = uri, // Lưu URI đầy đủ từ Cloudflare R2
+                StorageLocation = uri,
                 Extension = extension,
                 FileSize = file.Length,
                 FileTypeId = fileType.Id,

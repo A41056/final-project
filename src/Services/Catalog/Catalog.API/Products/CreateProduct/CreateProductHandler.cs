@@ -2,7 +2,7 @@
 
 public record CreateProductCommand(
     string Name,
-    List<Guid> Category,
+    List<Guid> CategoryIds,
     string Description,
     List<string> ImageFiles,
     bool IsHot,
@@ -17,7 +17,7 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
     public CreateProductCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
-        RuleFor(x => x.Category).NotEmpty().WithMessage("Category is required");
+        RuleFor(x => x.CategoryIds).NotEmpty().WithMessage("Category is required");
         RuleFor(x => x.Variants).NotEmpty().WithMessage("At least one variant is required");
         RuleForEach(x => x.Variants).SetValidator(new ProductVariantValidator());
     }
@@ -45,7 +45,7 @@ internal class CreateProductHandler(IDocumentSession session)
         var product = new Product
         {
             Name = command.Name,
-            CategoryIds = command.Category,
+            CategoryIds = command.CategoryIds,
             Description = command.Description,
             ImageFiles = command.ImageFiles,
             IsHot = command.IsHot,

@@ -2,7 +2,7 @@
 
 public record CreateProductRequest(
     string Name,
-    List<Guid> Category,
+    List<Guid> CategoryIds,
     string Description,
     List<string> ImageFiles,
     bool IsHot,

@@ -48,13 +48,7 @@ public class CloudflareStorageService : IStorageService
                 _logger.LogInformation("Successfully uploaded {FileName} to bucket {BucketName}", info.FileName, _bucketName);
             }
 
-            var presignedArgs = new PresignedGetObjectArgs()
-                .WithBucket(_bucketName)
-                .WithObject(info.FileName)
-                .WithExpiry(60 * 60);
-
-            string signedUrl = await _minioClient.PresignedGetObjectAsync(presignedArgs);
-            return signedUrl;
+            return info.FileName;
         }
         catch (Minio.Exceptions.MinioException minioEx)
         {
