@@ -1,21 +1,42 @@
 ﻿using Media.API.Service.Interfaces;
 
 namespace Media.API.File.DeleteFile;
-public record DeleteFileCommand(Guid FileId) : ICommand<Unit>;
+public record DeleteFileCommand(string FileName) : ICommand<DeleteFileResult>;
+public record DeleteFileResult(bool IsSuccess);
 
-internal class DeleteFileCommandHandler(IDocumentSession session, IStorageService storageService)
-    : ICommandHandler<DeleteFileCommand, Unit>
+public class DeleteFileCommandValidator : AbstractValidator<DeleteFileCommand>
 {
-    public async Task<Unit> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
+    public DeleteFileCommandValidator()
     {
-        var file = await session.LoadAsync<Model.File>(command.FileId);
+        RuleFor(x => x.FileName).NotEmpty().WithMessage("File name is required");
+    }
+}
+internal class DeleteFileHandler : ICommandHandler<DeleteFileCommand, DeleteFileResult>
+{
+    private readonly IDocumentSession _session;
+    private readonly IStorageService _storageService;
+
+    public DeleteFileHandler(IDocumentSession session, IStorageService storageService)
+    {
+        _session = session;
+        _storageService = storageService;
+    }
+
+    public async Task<DeleteFileResult> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
+    {
+        var file = _session.Query<Model.File>()
+            .FirstOrDefault(f => f.StorageLocation == command.FileName);
+
         if (file == null)
-            throw new KeyNotFoundException($"File with ID {command.FileId} not found.");
+        {
+            throw new FileNotFoundException(command.FileName);
+        }
 
-        session.Delete(file);
-        await session.SaveChangesAsync(cancellationToken);
-        await storageService.DeleteFile(file.StorageLocation);
+        await _storageService.DeleteFile(command.FileName);
 
-        return Unit.Value;
+        _session.Delete(file);
+        await _session.SaveChangesAsync(cancellationToken);
+
+        return new DeleteFileResult(true);
     }
 }
