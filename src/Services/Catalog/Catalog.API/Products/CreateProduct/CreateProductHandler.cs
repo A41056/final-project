@@ -51,6 +51,7 @@ internal class CreateProductHandler(IDocumentSession session)
             IsHot = command.IsHot,
             IsActive = command.IsActive,
             Variants = command.Variants,
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         };

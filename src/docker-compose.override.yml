@@ -118,8 +118,12 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Server=reviewdb;Port=5432;Database=ReviewDb;User Id=postgres;Password=root;Include Error Detail=true
+      - MessageBroker__Host=amqp://ecommerce-mq:5672
+      - MessageBroker__UserName=guest
+      - MessageBroker__Password=guest
     depends_on:
       - reviewdb
+      - messagebroker
     ports:
       - "6007:8080"
       - "6067:8081"
@@ -148,8 +152,12 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
       - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=root;Include Error Detail=true
+      - MessageBroker__Host=amqp://ecommerce-mq:5672
+      - MessageBroker__UserName=guest                 
+      - MessageBroker__Password=guest
     depends_on:
       - catalogdb
+      - messagebroker
     ports:
       - "6009:8080"
       - "6069:8081"

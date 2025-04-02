@@ -91,6 +91,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -118,6 +119,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -145,6 +147,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -172,6 +175,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -199,6 +203,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -226,6 +231,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         },
@@ -253,6 +259,7 @@ public class CatalogInitialData : IInitialData
                     StockCount = 100
                 }
             },
+            AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow
         }

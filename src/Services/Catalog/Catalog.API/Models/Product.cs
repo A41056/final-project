@@ -6,10 +6,11 @@
     public List<string> ImageFiles { get; set; } = new();
     public bool IsHot { get; set; }
     public bool IsActive { get; set; }
-    public DateTime Created { get; set; } = DateTime.UtcNow;
-    public DateTime Modified { get; set; } = DateTime.UtcNow;
+    public DateTime Created { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+    public DateTime Modified { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     public List<Guid> CategoryIds { get; set; } = new();
     public List<ProductVariant> Variants { get; set; } = new();
+    public double AverageRating { get; set; } = 0;
 }
 
 public class ProductVariant

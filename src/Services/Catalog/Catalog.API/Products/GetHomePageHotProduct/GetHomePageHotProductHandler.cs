@@ -12,13 +12,13 @@ internal class GetTopHotProductsQueryHandler(IDocumentSession session)
 {
     public async Task<GetTopHotProductsResult> Handle(GetTopHotProductsQuery query, CancellationToken cancellationToken)
     {
-        var productQuery = session.Query<Product>()
-            .Where(p => p.IsHot == true && p.IsActive == true)
-            .OrderByDescending(p => p.Created);
+        var baseQuery = session.Query<Product>()
+            .Where(p => p.IsHot == true && p.IsActive == true);
 
-        var totalItems = await productQuery.CountAsync(cancellationToken);
+        var totalItems = await baseQuery.CountAsync(cancellationToken);
 
-        var products = await productQuery
+        var products = await baseQuery
+            .OrderByDescending(p => p.Created)
             .ToPagedListAsync(query.PageNumber ?? 1, query.PageSize ?? 10, cancellationToken);
 
         return new GetTopHotProductsResult(products, totalItems);

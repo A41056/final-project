@@ -1,4 +1,6 @@
-﻿using Marten;
+﻿using BuildingBlocks.Messaging.Events;
+using Marten;
+using MassTransit;
 
 namespace Review.API.Reviews.CreateReview;
 
@@ -16,7 +18,7 @@ public class CreateReviewCommandValidator : AbstractValidator<CreateReviewComman
 }
 
 internal class CreateReviewCommandHandler
-    (IDocumentSession session)
+    (IDocumentSession session, IPublishEndpoint publishEndpoint)
     : ICommandHandler<CreateReviewCommand, CreateReviewResult>
 {
     public async Task<CreateReviewResult> Handle(CreateReviewCommand command, CancellationToken cancellationToken)
@@ -40,6 +42,19 @@ internal class CreateReviewCommandHandler
         //save to database
         session.Store(product);
         await session.SaveChangesAsync(cancellationToken);
+
+        var reviews = await session.Query<Models.Review>()
+            .Where(r => r.ProductId == command.ProductId)
+            .ToListAsync(cancellationToken);
+        var averageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+
+        // Push event ProductRatingUpdatedEvent
+        var eventMessage = new ProductRatingUpdatedEvent
+        {
+            ProductId = command.ProductId,
+            NewAverageRating = averageRating
+        };
+        await publishEndpoint.Publish(eventMessage, cancellationToken);
 
         //return result
         return new CreateReviewResult(product.Id);

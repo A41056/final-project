@@ -43,12 +43,12 @@ internal class GetProductsQueryHandler(IDocumentSession session)
 
         if (query.CreatedFrom.HasValue)
         {
-            productQuery = (IMartenQueryable<Product>)productQuery.Where(p => p.Created >= query.CreatedFrom.Value);
+            productQuery = (IMartenQueryable<Product>)productQuery.Where(p => p.Created >= DateTime.SpecifyKind(query.CreatedFrom.Value, DateTimeKind.Unspecified));
         }
 
         if (query.CreatedTo.HasValue)
         {
-            productQuery = (IMartenQueryable<Product>)productQuery.Where(p => p.Created <= query.CreatedTo.Value);
+            productQuery = (IMartenQueryable<Product>)productQuery.Where(p => p.Created <= DateTime.SpecifyKind(query.CreatedTo.Value, DateTimeKind.Unspecified));
         }
 
         var totalItems = await productQuery.CountAsync(cancellationToken);
