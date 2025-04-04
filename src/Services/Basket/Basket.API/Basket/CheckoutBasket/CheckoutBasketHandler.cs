@@ -14,7 +14,7 @@ public class CheckoutBasketCommandValidator
     public CheckoutBasketCommandValidator()
     {
         RuleFor(x => x.BasketCheckoutDto).NotNull().WithMessage("BasketCheckoutDto can't be null");
-        RuleFor(x => x.BasketCheckoutDto.UserName).NotEmpty().WithMessage("UserName is required");
+        RuleFor(x => x.BasketCheckoutDto.UserId).NotEmpty().WithMessage("UserId is required");
     }
 }
 
@@ -29,7 +29,7 @@ public class CheckoutBasketCommandHandler
         // send basket checkout event to rabbitmq using masstransit
         // delete the basket
 
-        var basket = await repository.GetBasket(command.BasketCheckoutDto.UserName, cancellationToken);
+        var basket = await repository.GetBasket(command.BasketCheckoutDto.UserId, cancellationToken);
         if (basket == null)
         {
             return new CheckoutBasketResult(false);
@@ -40,7 +40,7 @@ public class CheckoutBasketCommandHandler
 
         await publishEndpoint.Publish(eventMessage, cancellationToken);
 
-        await repository.DeleteBasket(command.BasketCheckoutDto.UserName, cancellationToken);
+        await repository.DeleteBasket(command.BasketCheckoutDto.UserId, cancellationToken);
 
         return new CheckoutBasketResult(true);
     }

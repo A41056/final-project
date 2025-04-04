@@ -1,4 +1,4 @@
-using Discount.Grpc;
+﻿using Discount.Grpc;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using BuildingBlocks.Messaging.MassTransit;
@@ -32,6 +32,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 //Application Services
 var assembly = typeof(Program).Assembly;
 builder.Services.AddCarter();
@@ -46,7 +57,7 @@ builder.Services.AddMediatR(config =>
 builder.Services.AddMarten(opts =>
 {
     opts.Connection(builder.Configuration.GetConnectionString("Database")!);
-    opts.Schema.For<ShoppingCart>().Identity(x => x.UserName);
+    opts.Schema.For<ShoppingCart>().Identity(x => x.UserId);
 }).UseLightweightSessions();
 
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
@@ -85,6 +96,7 @@ builder.Services.AddHealthChecks()
     .AddRedis(builder.Configuration.GetConnectionString("Redis")!);
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

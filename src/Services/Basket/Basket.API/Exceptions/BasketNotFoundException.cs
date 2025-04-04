@@ -2,7 +2,7 @@
 
 public class BasketNotFoundException : NotFoundException
 {
-    public BasketNotFoundException(string userName) : base("Basket", userName)
+    public BasketNotFoundException(Guid userId) : base("Basket", userId)
     {
         
     }

@@ -1,7 +1,7 @@
 ﻿namespace Basket.API.Basket.StoreBasket;
 
 public record StoreBasketRequest(ShoppingCart Cart);
-public record StoreBasketResponse(string UserName);
+public record StoreBasketResponse(Guid UserId);
 
 public class StoreBasketEndpoints : ICarterModule
 {
@@ -15,7 +15,7 @@ public class StoreBasketEndpoints : ICarterModule
 
             var response = result.Adapt<StoreBasketResponse>();
 
-            return Results.Created($"/basket/{response.UserName}", response);
+            return Results.Created($"/basket/{response.UserId}", response);
         })
         .WithName("CreateProduct")
         .Produces<StoreBasketResponse>(StatusCodes.Status201Created)

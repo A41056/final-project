@@ -3,14 +3,14 @@
 namespace Basket.API.Basket.StoreBasket;
 
 public record StoreBasketCommand(ShoppingCart Cart) : ICommand<StoreBasketResult>;
-public record StoreBasketResult(string UserName);
+public record StoreBasketResult(Guid userId);
 
 public class StoreBasketCommandValidator : AbstractValidator<StoreBasketCommand>
 {
     public StoreBasketCommandValidator()
     {
         RuleFor(x => x.Cart).NotNull().WithMessage("Cart can not be null");
-        RuleFor(x => x.Cart.UserName).NotEmpty().WithMessage("UserName is required");
+        RuleFor(x => x.Cart.UserId).NotEmpty().WithMessage("UserId is required");
     }
 }
 
@@ -24,7 +24,7 @@ public class StoreBasketCommandHandler
         
         await repository.StoreBasket(command.Cart, cancellationToken);
 
-        return new StoreBasketResult(command.Cart.UserName);
+        return new StoreBasketResult(command.Cart.UserId);
     }
 
     private async Task DeductDiscount(ShoppingCart cart, CancellationToken cancellationToken)
