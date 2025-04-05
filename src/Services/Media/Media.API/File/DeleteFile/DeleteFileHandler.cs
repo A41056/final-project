@@ -25,14 +25,14 @@ internal class DeleteFileHandler : ICommandHandler<DeleteFileCommand, DeleteFile
     public async Task<DeleteFileResult> Handle(DeleteFileCommand command, CancellationToken cancellationToken)
     {
         var file = _session.Query<Model.File>()
-            .FirstOrDefault(f => f.StorageLocation == command.FileName);
+            .FirstOrDefault(f => f.StorageLocation.EndsWith(command.FileName));
 
         if (file == null)
         {
             throw new FileNotFoundException(command.FileName);
         }
 
-        await _storageService.DeleteFile(command.FileName);
+        await _storageService.DeleteFile(file.StorageLocation);
 
         _session.Delete(file);
         await _session.SaveChangesAsync(cancellationToken);

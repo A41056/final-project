@@ -1,4 +1,5 @@
 ﻿using Media.API.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Minio;
 using Minio.DataModel.Args;
 
@@ -72,7 +73,8 @@ public class CloudflareStorageService : IStorageService
                 .WithObject(fileName);
 
             await _minioClient.RemoveObjectAsync(args);
-            _logger.LogInformation("Successfully deleted file {FileName} from bucket {BucketName}", fileName, _bucketName);
+            _logger.LogInformation("Successfully deleted file {StorageLocation} from bucket {BucketName}",
+                fileName, _bucketName);
         }
         catch (Exception e)
         {
