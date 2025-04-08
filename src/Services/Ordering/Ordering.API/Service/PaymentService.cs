@@ -1,9 +1,10 @@
-﻿using Payment.Common;
+﻿using Ordering.API.Models;
+using Payment.Common;
 using Payment.Enum;
 using Payment.Models.VnPays;
 using Payment.Services;
 
-namespace Payment.API.Service
+namespace Ordering.API.Service
 {
     public class PaymentService : IPaymentService
     {

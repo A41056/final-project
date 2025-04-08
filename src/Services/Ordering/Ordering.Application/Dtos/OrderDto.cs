@@ -1,4 +1,4 @@
-﻿using Ordering.Domain.Enums;
+﻿using Ordering.Payment.Common;
 
 namespace Ordering.Application.Dtos;
 
@@ -9,5 +9,5 @@ public record OrderDto(
     AddressDto ShippingAddress,
     AddressDto BillingAddress,
     PaymentDto Payment,
-    OrderStatus Status,
+    EOrderStatus Status,
     List<OrderItemDto> OrderItems);

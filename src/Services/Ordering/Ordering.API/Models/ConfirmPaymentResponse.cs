@@ -1,4 +1,4 @@
-﻿namespace Payment.API.Models
+﻿namespace Ordering.API.Models
 {
     public class ConfirmPaymentResponse
     {

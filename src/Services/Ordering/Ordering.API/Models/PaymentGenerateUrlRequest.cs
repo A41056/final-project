@@ -1,6 +1,6 @@
 ﻿using Payment.Enum;
 
-namespace Payment.API.Models
+namespace Ordering.API.Models
 {
     public class PaymentGenerateUrlRequest
     {

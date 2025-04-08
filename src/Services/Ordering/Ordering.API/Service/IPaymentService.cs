@@ -1,7 +1,7 @@
-﻿using Payment.API.ConfirmPayment;
+﻿using Ordering.API.ConfirmPayment;
 using Payment.Infrastructure.Models;
 
-namespace Payment.API.Service
+namespace Ordering.API.Service
 {
     public interface IPaymentService
     {

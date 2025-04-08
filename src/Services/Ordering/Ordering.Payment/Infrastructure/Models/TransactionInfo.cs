@@ -1,4 +1,4 @@
-﻿namespace Ordering.API.Models
+﻿namespace Ordering.Payment.Infrastructure.Models
 {
     public class TransactionInfo
     {
