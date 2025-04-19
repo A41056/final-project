@@ -1,5 +1,5 @@
 ﻿namespace Ordering.Domain.Enums;
-public enum OrderStatus
+public enum EOrderStatus
 {
     Draft = 1,
     Pending = 2,

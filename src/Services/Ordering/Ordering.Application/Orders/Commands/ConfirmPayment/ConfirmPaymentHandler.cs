@@ -1,4 +1,6 @@
-﻿using Marten;
+﻿using Microsoft.EntityFrameworkCore;
+using Ordering.Domain.Enums;
+using Ordering.Domain.Models;
 using Ordering.Payment.Common;
 using Ordering.Payment.Infrastructure.Models;
 using Ordering.Payment.Models.VnPays;
@@ -9,16 +11,16 @@ namespace Ordering.Application.Orders.Commands.ConfirmPayment;
 public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentCommand, ConfirmPaymentResult>
 {
     private readonly IPaymentFactory _paymentFactory;
-    private readonly IDocumentSession _session;
+    private readonly IApplicationDbContext _dbContext; // Thay _session bằng _dbContext
     private readonly ILogger<ConfirmPaymentCommandHandler> _logger;
 
     public ConfirmPaymentCommandHandler(
         IPaymentFactory paymentFactory,
-        IDocumentSession session,
+        IApplicationDbContext dbContext, // Thêm IApplicationDbContext
         ILogger<ConfirmPaymentCommandHandler> logger)
     {
         _paymentFactory = paymentFactory;
-        _session = session;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -87,8 +89,11 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
                 confirmResponse.PaymentContent);
         }
 
-        var order = await _session.Query<Order>()
+        // Sử dụng IApplicationDbContext để truy vấn Order
+        var order = await _dbContext.Orders
+            .Include(o => o.OrderItems) // Bao gồm OrderItems để tính totalPayment
             .FirstOrDefaultAsync(o => o.TransactionId == transactionId, cancellationToken);
+
         if (order == null)
         {
             _logger.LogInformation("Payment failed: Order not found for TransactionId={TransactionId}", transactionId);
@@ -150,7 +155,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
             await UpdateOrderStatus(order, EOrderStatus.Failed);
         }
 
-        await _session.SaveChangesAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken); // Sử dụng EF Core SaveChangesAsync
 
         return new ConfirmPaymentResult(
             confirmResponse.RspCode == Constants.VnPayResponseCode.TransactionSuccessfully ? Constants.VnPayResponseCode.TransactionSuccessfully : confirmResponse.RspCode,
@@ -168,19 +173,19 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         _logger.LogInformation("Payment successful: OrderCode={OrderCode}, TransactionId={TransactionId}, VNPayTranId={TransactionNo}",
             order.OrderCode, confirmResponse.TransactionId, confirmResponse.TransactionNo);
 
-        await UpdateOrderStatus(order, EOrderStatus.Done);
+        await UpdateOrderStatus(order, Domain.Enums.EOrderStatus.Done);
         order.PayDate = confirmResponse.PayDate ?? DateTime.UtcNow;
         order.TransactionId = Guid.Parse(confirmResponse.TransactionId);
 
         await NotifyExternalServices(order);
     }
 
-    private async Task UpdateOrderStatus(Order order, EOrderStatus newStatus)
+    private async Task UpdateOrderStatus(Order order, Domain.Enums.EOrderStatus newStatus)
     {
         _logger.LogInformation("Changing Order Status: OrderCode={OrderCode}, OldStatus={OldStatus}, NewStatus={NewStatus}",
             order.OrderCode, order.Status.ToString(), newStatus.ToString());
         order.Status = newStatus;
-        _session.Store(order);
+        // Không cần gọi _dbContext.Update(order) vì EF Core tự theo dõi thay đổi
         await Task.CompletedTask;
     }
 
@@ -190,21 +195,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         // Placeholder: Publish events for Catalog (stock), Invoice, etc.
         // Example:
         // await _eventBus.Publish(new OrderConfirmedEvent(order.OrderCode, order.OrderItems));
-        await Task.CompletedTask; // Replace with actual event publishing
+        await Task.CompletedTask; // Thay bằng xuất bản sự kiện thực tế
     }
-}
-
-public partial class Order
-{
-    public string OrderCode { get; set; } // Add if not present
-    public Guid? TransactionId { get; set; } // Store VNPay TransactionId
-    public DateTime? PayDate { get; set; } // Store payment date
-    public List<OrderItem> OrderItems { get; set; } // Already has this
-}
-
-public class OrderItem
-{
-    public Guid ProductId { get; set; }
-    public int Quantity { get; set; }
-    public decimal UnitPrice { get; set; } // Price from BasketCheckoutEvent
 }

@@ -26,8 +26,7 @@ public class CreateOrderHandler(IApplicationDbContext dbContext)
                 customerId: CustomerId.Of(orderDto.CustomerId),
                 orderName: OrderName.Of(orderDto.OrderName),
                 shippingAddress: shippingAddress,
-                billingAddress: billingAddress,
-                payment: Payment.Of(orderDto.Payment.CardName, orderDto.Payment.CardNumber, orderDto.Payment.Expiration, orderDto.Payment.Cvv, orderDto.Payment.PaymentMethod)
+                billingAddress: billingAddress
                 );
 
         foreach (var orderItemDto in orderDto.OrderItems)

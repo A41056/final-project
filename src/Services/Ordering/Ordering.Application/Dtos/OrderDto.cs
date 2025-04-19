@@ -1,4 +1,4 @@
-﻿using Ordering.Payment.Common;
+﻿using Ordering.Domain.Enums;
 
 namespace Ordering.Application.Dtos;
 

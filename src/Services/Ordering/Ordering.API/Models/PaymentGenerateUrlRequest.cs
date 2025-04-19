@@ -1,4 +1,4 @@
-﻿using Payment.Enum;
+﻿using Ordering.Payment.Common;
 
 namespace Ordering.API.Models
 {

@@ -1,4 +1,7 @@
-﻿namespace Ordering.Domain.Models;
+﻿using Ordering.Domain.Extensions;
+
+namespace Ordering.Domain.Models;
+
 public class Order : Aggregate<OrderId>
 {
     private readonly List<OrderItem> _orderItems = new();
@@ -9,14 +12,15 @@ public class Order : Aggregate<OrderId>
     public Address ShippingAddress { get; private set; } = default!;
     public Address BillingAddress { get; private set; } = default!;
     public Payment Payment { get; private set; } = default!;
-    public OrderStatus Status { get; private set; } = OrderStatus.Pending;
+    public EOrderStatus Status { get; set; } = EOrderStatus.Pending;
+    public string OrderCode { get; set; } = default!;
     public decimal TotalPrice
     {
         get => OrderItems.Sum(x => x.Price * x.Quantity);
         private set { }
     }
 
-    public static Order Create(OrderId id, CustomerId customerId, OrderName orderName, Address shippingAddress, Address billingAddress, Payment payment)
+    public static Order Create(OrderId id, CustomerId customerId, OrderName orderName, Address shippingAddress, Address billingAddress)
     {
         var order = new Order
         {
@@ -25,8 +29,9 @@ public class Order : Aggregate<OrderId>
             OrderName = orderName,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
-            Payment = payment,
-            Status = OrderStatus.Pending
+            Payment = null,
+            Status = EOrderStatus.Pending,
+            OrderCode = RandomStringExtensions.randomString(12)
         };
 
         order.AddDomainEvent(new OrderCreatedEvent(order));
@@ -34,7 +39,7 @@ public class Order : Aggregate<OrderId>
         return order;
     }
 
-    public void Update(OrderName orderName, Address shippingAddress, Address billingAddress, Payment payment, OrderStatus status)
+    public void Update(OrderName orderName, Address shippingAddress, Address billingAddress, Payment payment, EOrderStatus status)
     {
         OrderName = orderName;
         ShippingAddress = shippingAddress;
@@ -45,12 +50,12 @@ public class Order : Aggregate<OrderId>
         AddDomainEvent(new OrderUpdatedEvent(this));
     }
 
-    public void Add(ProductId productId, int quantity, decimal price)
+    public void Add(ProductId productId, int quantity, decimal price, List<VariantProperty>? variantProperties = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(price);
 
-        var orderItem = new OrderItem(Id, productId, quantity, price);
+        var orderItem = new OrderItem(Id, productId, quantity, price, variantProperties);
         _orderItems.Add(orderItem);
     }
 
