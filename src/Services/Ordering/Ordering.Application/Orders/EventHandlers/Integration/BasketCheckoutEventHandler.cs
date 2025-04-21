@@ -2,6 +2,7 @@
 using MassTransit;
 using NetTopologySuite.Index.HPRtree;
 using Ordering.Application.Orders.Commands.CreateOrder;
+using Ordering.Domain.Enums;
 using Ordering.Payment.Common;
 using System.Net.Http.Json;
 
@@ -31,12 +32,13 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         _logger.LogInformation("Processing BasketCheckoutEvent for UserId: {UserId}", context.Message.UserId);
 
         // Bước 1: Xác thực sản phẩm với Catalog Service
-        var products = await ValidateProducts(context.Message.Items);
-        if (products == null)
-        {
-            _logger.LogError("Product validation failed for BasketCheckoutEvent");
-            return; // Có thể gửi sự kiện lỗi nếu cần
-        }
+        //var products = await ValidateProducts(context.Message.Items);
+        //if (products == null)
+        //{
+        //    _logger.LogError("Product validation failed for BasketCheckoutEvent");
+        //    return; // Có thể gửi sự kiện lỗi nếu cần
+        //}
+        var products = context.Message.Items;
 
         // Bước 2: Tạo lệnh CreateOrderCommand
         var command = await MapToCreateOrderCommand(context.Message, products);
@@ -59,6 +61,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             UserId = context.Message.UserId,
             PaymentUrl = paymentUrl
         };
+
         await _publishEndpoint.Publish(paymentUrlEvent, context.CancellationToken);
         _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", orderId.Id);
     }
@@ -118,7 +121,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         return products;
     }
 
-    private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<CatalogProductDto> products)
+    private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<BasketItem> products)
     {
         var orderId = Guid.NewGuid();
         var addressDto = new AddressDto(
@@ -141,18 +144,14 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         var orderItems = new List<OrderItemDto>();
         decimal calculatedTotal = 0;
 
-        foreach (var item in message.Items)
+        foreach (var item in products)
         {
-            var product = products.First(p => p.Id == item.ProductId);
-            var variant = product.Variants.First(v =>
-                v.Properties.All(p => item.VariantProperties.Any(vp => vp.Type == p.Type && vp.Value == p.Value)));
-
             orderItems.Add(new OrderItemDto(
                 OrderId: orderId,
                 ProductId: item.ProductId,
                 Quantity: item.Quantity,
                 Price: item.UnitPrice,
-                VariantProperties: item.VariantProperties.Select(vp => new VariantPropertyDto
+                VariantProperties: item.VariantProperties.Select(vp => new Dtos.VariantPropertyDto
                 {
                     Type = vp.Type,
                     Value = vp.Value,
@@ -176,7 +175,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             ShippingAddress: addressDto,
             BillingAddress: addressDto,
             Payment: paymentDto,
-            Status: EOrderStatus.PauseForConfirmation,
+            Status: EOrderStatus.Pending,
             OrderItems: orderItems
         );
 
@@ -203,7 +202,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
                 ProductId: i.ProductId,
                 Quantity: i.Quantity,
                 Price: i.UnitPrice,
-                VariantProperties: i.VariantProperties.Select(vp => new VariantPropertyDto
+                VariantProperties: i.VariantProperties.Select(vp => new Dtos.VariantPropertyDto
                 {
                     Type = vp.Type,
                     Value = vp.Value,

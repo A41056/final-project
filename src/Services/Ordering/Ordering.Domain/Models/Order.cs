@@ -14,6 +14,8 @@ public class Order : Aggregate<OrderId>
     public Payment Payment { get; private set; } = default!;
     public EOrderStatus Status { get; set; } = EOrderStatus.Pending;
     public string OrderCode { get; set; } = default!;
+    public DateTime PayDate { get; set; }
+    public Guid TransactionId { get; set; }
     public decimal TotalPrice
     {
         get => OrderItems.Sum(x => x.Price * x.Quantity);

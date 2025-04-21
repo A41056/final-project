@@ -17,17 +17,19 @@ public class UserInitialData : IInitialData
 
     private static IEnumerable<User.API.Models.User> GetPreconfiguredUsers() => new List<User.API.Models.User>
     {
-        CreateUser("admin", "admin@example.com", "1234567890", "123 Admin Street", "Male", 30, "123456", Guid.NewGuid()),
-        CreateUser("user", "user@example.com", "0987654321", "456 User Street", "Female", 25, "123456", Guid.NewGuid())
+        CreateUser("admin", "admin@example.com", "Pham Van", "A", "1234567890", "123 Admin Street", "Male", 30, "123456", Guid.NewGuid()),
+        CreateUser("user", "user@example.com", "Nguyen Van", "B", "0987654321", "456 User Street", "Female", 25, "123456", Guid.NewGuid())
     };
 
-    private static User.API.Models.User CreateUser(string username, string email, string phone, string address, string gender, int age, string password, Guid roleId)
+    private static User.API.Models.User CreateUser(string username, string email, string firstName, string lastName, string phone, string address, string gender, int age, string password, Guid roleId)
     {
         var (hash, salt) = HashHelper.HashPassword(password);
         return new User.API.Models.User
         {
             Username = username,
             Email = email,
+            FirstName = firstName,
+            LastName = lastName,
             Phone = phone,
             Address = address,
             Gender = gender,

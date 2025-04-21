@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Ordering.Domain.Enums;
-using Ordering.Domain.Models;
+﻿using Ordering.Domain.Enums;
 using Ordering.Payment.Common;
 using Ordering.Payment.Infrastructure.Models;
 using Ordering.Payment.Models.VnPays;
@@ -108,7 +106,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
                 confirmResponse.PaymentContent);
         }
 
-        var totalPayment = order.OrderItems.Sum(i => i.UnitPrice * i.Quantity);
+        var totalPayment = order.OrderItems.Sum(i => i.Price * i.Quantity);
         if (totalPayment != confirmResponse.Amount)
         {
             _logger.LogInformation("Payment failed: Amount mismatch for OrderCode={OrderCode}, Expected={Expected}, Received={Received}",
@@ -124,11 +122,11 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
                 confirmResponse.PaymentContent);
         }
 
-        if (order.Status == EOrderStatus.Done || order.Status == EOrderStatus.PauseForConfirmation)
+        if (order.Status == EOrderStatus.Completed)
         {
             return new ConfirmPaymentResult(
-                order.Status == EOrderStatus.Done ? Constants.VnPayResponseCode.OrderAlreadyConfirmed : Constants.VnPayResponseCode.TransactionSuccessfully,
-                order.Status == EOrderStatus.Done ? "Order already confirmed" : "Confirm Success",
+                order.Status == EOrderStatus.Completed ? Constants.VnPayResponseCode.OrderAlreadyConfirmed : Constants.VnPayResponseCode.TransactionSuccessfully,
+                order.Status == EOrderStatus.Completed ? "Order already confirmed" : "Confirm Success",
                 confirmResponse.TransactionId,
                 confirmResponse.Amount,
                 confirmResponse.TransactionNo,
@@ -141,7 +139,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         {
             _logger.LogInformation("Bank under maintenance: TransactionId={TransactionId}, OrderCode={OrderCode}",
                 transactionId, order.OrderCode);
-            await UpdateOrderStatus(order, EOrderStatus.PauseForConfirmation);
+            await UpdateOrderStatus(order, EOrderStatus.Failed);
         }
         else if (confirmResponse.RspCode == Constants.VnPayResponseCode.TransactionSuccessfully &&
                  confirmResponse.TransactionStatus == Constants.VnPayResponseCode.TransactionSuccessfully)
@@ -173,7 +171,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         _logger.LogInformation("Payment successful: OrderCode={OrderCode}, TransactionId={TransactionId}, VNPayTranId={TransactionNo}",
             order.OrderCode, confirmResponse.TransactionId, confirmResponse.TransactionNo);
 
-        await UpdateOrderStatus(order, Domain.Enums.EOrderStatus.Done);
+        await UpdateOrderStatus(order, Domain.Enums.EOrderStatus.Completed);
         order.PayDate = confirmResponse.PayDate ?? DateTime.UtcNow;
         order.TransactionId = Guid.Parse(confirmResponse.TransactionId);
 
@@ -185,7 +183,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         _logger.LogInformation("Changing Order Status: OrderCode={OrderCode}, OldStatus={OldStatus}, NewStatus={NewStatus}",
             order.OrderCode, order.Status.ToString(), newStatus.ToString());
         order.Status = newStatus;
-        // Không cần gọi _dbContext.Update(order) vì EF Core tự theo dõi thay đổi
         await Task.CompletedTask;
     }
 

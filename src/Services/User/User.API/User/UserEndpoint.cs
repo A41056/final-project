@@ -6,9 +6,9 @@ using User.API.Helpers;
 
 namespace User.API.User;
 
-public record RegisterDto(string Username, string Email, string Password, string Phone, string Address, string Gender, int Age, Guid RoleId);
+public record RegisterDto(string Username, string Email, string FirstName, string LastName, string Password, string Phone, string Address, string Gender, int Age, Guid RoleId);
 public record LoginDto(string Email, string Password);
-public record UpdateUserDto(string? Username, string? Email, string? Phone, string? Address, string? Gender, int? Age);
+public record UpdateUserDto(string? Username, string? Email, string? FirstName, string? LastName, string? Phone, string? Address, string? Gender, int? Age);
 
 public class UserEndpoint : ICarterModule
 {
@@ -25,6 +25,8 @@ public class UserEndpoint : ICarterModule
             {
                 Username = dto.Username,
                 Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
                 Phone = dto.Phone,
                 Address = dto.Address,
                 Gender = dto.Gender,
@@ -64,6 +66,8 @@ public class UserEndpoint : ICarterModule
                 Id = user.Id,
                 Username = user.Username,
                 Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Phone = user.Phone,
                 Address = user.Address,
                 Gender = user.Gender,
@@ -87,6 +91,8 @@ public class UserEndpoint : ICarterModule
             {
                 Username = dto.Username,
                 Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
                 Phone = dto.Phone,
                 Address = dto.Address,
                 Gender = dto.Gender,
@@ -109,6 +115,8 @@ public class UserEndpoint : ICarterModule
 
             user.Username = dto.Username ?? user.Username;
             user.Email = dto.Email ?? user.Email;
+            user.FirstName = dto.FirstName ?? user.FirstName;
+            user.LastName = dto.LastName ?? user.LastName;
             user.Phone = dto.Phone ?? user.Phone;
             user.Address = dto.Address ?? user.Address;
             user.Gender = dto.Gender ?? user.Gender;
@@ -145,6 +153,8 @@ public class UserEndpoint : ICarterModule
                 Id = user.Id,
                 Username = user.Username,
                 Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Phone = user.Phone,
                 Address = user.Address,
                 Gender = user.Gender,
@@ -174,6 +184,8 @@ public class UserEndpoint : ICarterModule
                 Id = user.Id,
                 Username = user.Username,
                 Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Phone = user.Phone,
                 Address = user.Address,
                 Gender = user.Gender,
