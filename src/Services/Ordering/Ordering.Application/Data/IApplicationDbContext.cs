@@ -8,6 +8,7 @@ public interface IApplicationDbContext
     DbSet<Product> Products { get; }
     DbSet<Order> Orders { get; }
     DbSet<OrderItem> OrderItems { get; }
+    DbSet<VariantProperty> VariantProperties { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

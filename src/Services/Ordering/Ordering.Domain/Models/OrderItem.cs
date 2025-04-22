@@ -4,25 +4,26 @@ public class OrderItem : Entity<OrderItemId>
 {
     private readonly List<VariantProperty> _variantProperties = new();
     public IReadOnlyList<VariantProperty> VariantProperties => _variantProperties.AsReadOnly();
+    public OrderId OrderId { get; private set; } = default!;
+    public ProductId ProductId { get; private set; } = default!;
+    public int Quantity { get; private set; } = default!;
+    public decimal Price { get; private set; } = default!;
 
-    internal OrderItem(OrderId orderId, ProductId productId, int quantity, decimal price, List<VariantProperty>? variantProperties = null)
+    internal OrderItem(OrderId orderId, ProductId productId, int quantity, decimal price)
     {
         Id = OrderItemId.Of(Guid.NewGuid());
         OrderId = orderId;
         ProductId = productId;
         Quantity = quantity;
         Price = price;
-        _variantProperties = variantProperties ?? new List<VariantProperty>();
     }
-
-    public OrderId OrderId { get; private set; } = default!;
-    public ProductId ProductId { get; private set; } = default!;
-    public int Quantity { get; private set; } = default!;
-    public decimal Price { get; private set; } = default!;
+    private OrderItem() { }
 }
 
 public class VariantProperty
 {
+    public Guid Id { get; private set; } // Primary key
+    public OrderItemId OrderItemId { get; private set; } // Foreign key
     public string Type { get; private set; }
     public string Value { get; private set; }
     public string? Image { get; private set; }
@@ -33,4 +34,5 @@ public class VariantProperty
         Value = value ?? throw new ArgumentNullException(nameof(value));
         Image = image;
     }
+    private VariantProperty() { }
 }

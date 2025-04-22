@@ -66,60 +66,60 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", orderId.Id);
     }
 
-    private async Task<List<CatalogProductDto>?> ValidateProducts(List<BasketItem> items)
-    {
-        var client = _httpClientFactory.CreateClient("CatalogService");
-        var productIds = items.Select(i => i.ProductId).ToList();
-        var response = await client.PostAsJsonAsync("/api/products/bulk", productIds);
+    //private async Task<List<CatalogProductDto>?> ValidateProducts(List<BasketItem> items)
+    //{
+    //    var client = _httpClientFactory.CreateClient("CatalogService");
+    //    var productIds = items.Select(i => i.ProductId).ToList();
+    //    var response = await client.PostAsJsonAsync("/api/products/bulk", productIds);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("Failed to fetch products from Catalog Service");
-            return null;
-        }
+    //    if (!response.IsSuccessStatusCode)
+    //    {
+    //        _logger.LogError("Failed to fetch products from Catalog Service");
+    //        return null;
+    //    }
 
-        var products = await response.Content.ReadFromJsonAsync<List<CatalogProductDto>>();
-        if (products == null || products.Count != items.Count)
-        {
-            _logger.LogError("Product count mismatch or null response from Catalog Service");
-            return null;
-        }
+    //    var products = await response.Content.ReadFromJsonAsync<List<CatalogProductDto>>();
+    //    if (products == null || products.Count != items.Count)
+    //    {
+    //        _logger.LogError("Product count mismatch or null response from Catalog Service");
+    //        return null;
+    //    }
 
-        // Kiểm tra giá và tồn kho
-        foreach (var item in items)
-        {
-            var product = products.FirstOrDefault(p => p.Id == item.ProductId);
-            if (product == null)
-            {
-                _logger.LogError("Product not found: ProductId={ProductId}", item.ProductId);
-                return null;
-            }
+    //    // Kiểm tra giá và tồn kho
+    //    foreach (var item in items)
+    //    {
+    //        var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+    //        if (product == null)
+    //        {
+    //            _logger.LogError("Product not found: ProductId={ProductId}", item.ProductId);
+    //            return null;
+    //        }
 
-            var variant = product.Variants.FirstOrDefault(v =>
-                v.Properties.All(p => item.VariantProperties.Any(vp => vp.Type == p.Type && vp.Value == p.Value)));
-            if (variant == null)
-            {
-                _logger.LogError("Variant not found for ProductId={ProductId}", item.ProductId);
-                return null;
-            }
+    //        var variant = product.Variants.FirstOrDefault(v =>
+    //            v.Properties.All(p => item.VariantProperties.Any(vp => vp.Type == p.Type && vp.Value == p.Value)));
+    //        if (variant == null)
+    //        {
+    //            _logger.LogError("Variant not found for ProductId={ProductId}", item.ProductId);
+    //            return null;
+    //        }
 
-            if (variant.Price != item.UnitPrice)
-            {
-                _logger.LogWarning("Price mismatch for ProductId={ProductId}. Expected={Expected}, Actual={Actual}",
-                    item.ProductId, variant.Price, item.UnitPrice);
-                return null;
-            }
+    //        if (variant.Price != item.UnitPrice)
+    //        {
+    //            _logger.LogWarning("Price mismatch for ProductId={ProductId}. Expected={Expected}, Actual={Actual}",
+    //                item.ProductId, variant.Price, item.UnitPrice);
+    //            return null;
+    //        }
 
-            if (variant.StockCount < item.Quantity)
-            {
-                _logger.LogError("Insufficient stock for ProductId={ProductId}. Requested={Requested}, Available={Available}",
-                    item.ProductId, item.Quantity, variant.StockCount);
-                return null;
-            }
-        }
+    //        if (variant.StockCount < item.Quantity)
+    //        {
+    //            _logger.LogError("Insufficient stock for ProductId={ProductId}. Requested={Requested}, Available={Available}",
+    //                item.ProductId, item.Quantity, variant.StockCount);
+    //            return null;
+    //        }
+    //    }
 
-        return products;
-    }
+    //    return products;
+    //}
 
     private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<BasketItem> products)
     {

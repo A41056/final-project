@@ -31,7 +31,7 @@ public class Order : Aggregate<OrderId>
             OrderName = orderName,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
-            Payment = null,
+            Payment = Payment.Of( "cardName", "cardNumber", "expiration","cvv", 1) ,
             Status = EOrderStatus.Pending,
             OrderCode = RandomStringExtensions.randomString(12)
         };
@@ -57,7 +57,14 @@ public class Order : Aggregate<OrderId>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(price);
 
-        var orderItem = new OrderItem(Id, productId, quantity, price, variantProperties);
+        var orderItem = new OrderItem(Id, productId, quantity, price);
+        if (variantProperties != null)
+        {
+            foreach (var vp in variantProperties)
+            {
+                orderItem.VariantProperties.ToList().Add(vp);
+            }
+        }
         _orderItems.Add(orderItem);
     }
 

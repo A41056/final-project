@@ -1,9 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Ordering.Domain.Models;
-using Ordering.Domain.ValueObjects;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Ordering.Infrastructure.Data.Configurations;
 public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
     public void Configure(EntityTypeBuilder<OrderItem> builder)
@@ -11,8 +7,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.HasKey(oi => oi.Id);
 
         builder.Property(oi => oi.Id).HasConversion(
-                                   orderItemId => orderItemId.Value,
-                                   dbId => OrderItemId.Of(dbId));
+            orderItemId => orderItemId.Value,
+            dbId => OrderItemId.Of(dbId));
 
         builder.HasOne<Product>()
             .WithMany()
@@ -21,5 +17,10 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(oi => oi.Quantity).IsRequired();
 
         builder.Property(oi => oi.Price).IsRequired();
+
+        builder.HasMany(oi => oi.VariantProperties)
+            .WithOne()
+            .HasForeignKey("OrderItemId")
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
