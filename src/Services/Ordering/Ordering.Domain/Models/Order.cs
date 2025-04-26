@@ -11,7 +11,6 @@ public class Order : Aggregate<OrderId>
     public OrderName OrderName { get; private set; } = default!;
     public Address ShippingAddress { get; private set; } = default!;
     public Address BillingAddress { get; private set; } = default!;
-    public Payment Payment { get; private set; } = default!;
     public EOrderStatus Status { get; set; } = EOrderStatus.Pending;
     public string OrderCode { get; set; } = default!;
     public DateTime PayDate { get; set; }
@@ -31,7 +30,6 @@ public class Order : Aggregate<OrderId>
             OrderName = orderName,
             ShippingAddress = shippingAddress,
             BillingAddress = billingAddress,
-            Payment = Payment.Of( "cardName", "cardNumber", "expiration","cvv", 1) ,
             Status = EOrderStatus.Pending,
             OrderCode = RandomStringExtensions.randomString(12)
         };
@@ -41,12 +39,11 @@ public class Order : Aggregate<OrderId>
         return order;
     }
 
-    public void Update(OrderName orderName, Address shippingAddress, Address billingAddress, Payment payment, EOrderStatus status)
+    public void Update(OrderName orderName, Address shippingAddress, Address billingAddress, EOrderStatus status)
     {
         OrderName = orderName;
         ShippingAddress = shippingAddress;
         BillingAddress = billingAddress;
-        Payment = payment;
         Status = status;
 
         AddDomainEvent(new OrderUpdatedEvent(this));

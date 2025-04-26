@@ -2,6 +2,7 @@
 using MassTransit;
 using NetTopologySuite.Index.HPRtree;
 using Ordering.Application.Orders.Commands.CreateOrder;
+using Ordering.Application.Orders.Commands.GeneratePaymentUrl;
 using Ordering.Domain.Enums;
 using Ordering.Payment.Common;
 using System.Net.Http.Json;
@@ -133,14 +134,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             message.State,
             message.ZipCode
         );
-        var paymentDto = new PaymentDto(
-            message.CardName,
-            message.CardNumber,
-            message.Expiration,
-            message.CVV,
-            message.PaymentMethod
-        );
-
+        
         var orderItems = new List<OrderItemDto>();
         decimal calculatedTotal = 0;
 
@@ -174,7 +168,6 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             OrderName: message.UserName,
             ShippingAddress: addressDto,
             BillingAddress: addressDto,
-            Payment: paymentDto,
             Status: EOrderStatus.Pending,
             OrderItems: orderItems
         );
@@ -184,8 +177,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
 
     private async Task<string> GeneratePaymentUrl(BasketCheckoutEvent message, Guid orderId)
     {
-        var client = _httpClientFactory.CreateClient("OrderingService");
-        var request = new PaymentGenerateUrlRequest(
+        var command = new GeneratePaymentUrlCommand(
             OrderCode: orderId.ToString(),
             PaymentMethod: (EOrderPaymentMethod)message.PaymentMethod,
             CustomerId: message.CustomerId,
@@ -211,14 +203,15 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             )).ToList()
         );
 
-        var response = await client.PostAsJsonAsync("/payment-generate-url", request);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            _logger.LogError("Failed to generate VNPay payment URL for OrderId: {OrderId}", orderId);
+            var result = await _sender.Send(command);
+            return result.PaymentUrl;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate VNPay payment URL for OrderId: {OrderId}", orderId);
             return string.Empty;
         }
-
-        var result = await response.Content.ReadFromJsonAsync<GeneratePaymentUrlResponse>();
-        return result?.PaymentUrl ?? string.Empty;
     }
 }

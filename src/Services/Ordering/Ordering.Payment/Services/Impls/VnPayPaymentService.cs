@@ -51,6 +51,11 @@ public class VnPayPaymentService : PaymentProvider<VnpayPaymentModel, VnpayTrans
         // fix timezone utc+7
         var vnDateTime = DateTime.UtcNow.AddHours(7);
 
+        if (string.IsNullOrEmpty(model.BillFullName))
+        {
+            model.BillFullName = "Testing";
+        }
+
         vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION)
             .AddRequestData("vnp_Command", "pay")
             .AddRequestData("vnp_TmnCode", _vnpaySetting.VnpTmnCode)

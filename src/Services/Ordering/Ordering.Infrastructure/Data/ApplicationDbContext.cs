@@ -14,7 +14,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<VariantProperty> VariantProperties => Set<VariantProperty>();
-
+    public DbSet<Domain.Models.Transaction> Transactions => Set<Domain.Models.Transaction>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

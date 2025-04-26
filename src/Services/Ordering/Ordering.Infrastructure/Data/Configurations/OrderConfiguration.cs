@@ -1,121 +1,75 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.Enums;
-using Ordering.Domain.Models;
-using Ordering.Domain.ValueObjects;
 
 namespace Ordering.Infrastructure.Data.Configurations;
+
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
     public void Configure(EntityTypeBuilder<Order> builder)
     {
+        builder.ToTable("Orders");
         builder.HasKey(o => o.Id);
 
-        builder.Property(o => o.Id).HasConversion(
-                        orderId => orderId.Value,
-                        dbId => OrderId.Of(dbId));
+        // Map Value Object: OrderId
+        builder.Property(o => o.Id)
+               .HasConversion(id => id.Value, value => OrderId.Of(value))
+               .ValueGeneratedNever();
 
-        builder.HasOne<Customer>()
-          .WithMany()
-          .HasForeignKey(o => o.CustomerId)
-          .IsRequired();
+        // Map Value Object: CustomerId
+        builder.Property(o => o.CustomerId)
+               .HasConversion(id => id.Value, value => CustomerId.Of(value));
 
-        builder.HasMany(o => o.OrderItems)
-            .WithOne()
-            .HasForeignKey(oi => oi.OrderId);
+        // Map Value Object: OrderName
+        builder.Property(o => o.OrderName)
+               .HasConversion(name => name.Value, value => OrderName.Of(value))
+               .HasMaxLength(100);
 
-        builder.ComplexProperty(
-            o => o.OrderName, nameBuilder =>
-            {
-                nameBuilder.Property(n => n.Value)
-                    .HasColumnName(nameof(Order.OrderName))
-                    .HasMaxLength(100)
-                    .IsRequired();
-            });
+        // Map Complex Type: Address (Owned Type)
+        builder.OwnsOne(o => o.ShippingAddress, a =>
+        {
+            a.Property(p => p.FirstName).HasColumnName("ShippingFirstName").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.LastName).HasColumnName("ShippingLastName").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.EmailAddress).HasColumnName("ShippingEmailAddress").HasMaxLength(100).IsRequired(false);
+            a.Property(p => p.AddressLine).HasColumnName("ShippingAddressLine").HasMaxLength(200).IsRequired(false);
+            a.Property(p => p.Country).HasColumnName("ShippingCountry").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.State).HasColumnName("ShippingState").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.ZipCode).HasColumnName("ShippingZipCode").HasMaxLength(20).IsRequired(false);
+        });
 
-        builder.ComplexProperty(
-           o => o.ShippingAddress, addressBuilder =>
-           {
-               addressBuilder.Property(a => a.FirstName)
-                   .HasMaxLength(50)
-                   .IsRequired();
+        builder.OwnsOne(o => o.BillingAddress, a =>
+        {
+            a.Property(p => p.FirstName).HasColumnName("BillingFirstName").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.LastName).HasColumnName("BillingLastName").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.EmailAddress).HasColumnName("BillingEmailAddress").HasMaxLength(100).IsRequired(false);
+            a.Property(p => p.AddressLine).HasColumnName("BillingAddressLine").HasMaxLength(200).IsRequired(false);
+            a.Property(p => p.Country).HasColumnName("BillingCountry").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.State).HasColumnName("BillingState").HasMaxLength(50).IsRequired(false);
+            a.Property(p => p.ZipCode).HasColumnName("BillingZipCode").HasMaxLength(20).IsRequired(false);
+        });
 
-               addressBuilder.Property(a => a.LastName)
-                    .HasMaxLength(50)
-                    .IsRequired();
-
-               addressBuilder.Property(a => a.EmailAddress)
-                   .HasMaxLength(50);
-
-               addressBuilder.Property(a => a.AddressLine)
-                   .HasMaxLength(180)
-                   .IsRequired();
-
-               addressBuilder.Property(a => a.Country)
-                   .HasMaxLength(50);
-
-               addressBuilder.Property(a => a.State)
-                   .HasMaxLength(50);
-
-               addressBuilder.Property(a => a.ZipCode)
-                   .HasMaxLength(5)
-                   .IsRequired();
-           });
-
-        builder.ComplexProperty(
-          o => o.BillingAddress, addressBuilder =>
-          {
-              addressBuilder.Property(a => a.FirstName)
-                   .HasMaxLength(50)
-                   .IsRequired();
-
-              addressBuilder.Property(a => a.LastName)
-                   .HasMaxLength(50)
-                   .IsRequired();
-
-              addressBuilder.Property(a => a.EmailAddress)
-                  .HasMaxLength(50);
-
-              addressBuilder.Property(a => a.AddressLine)
-                  .HasMaxLength(180)
-                  .IsRequired();
-
-              addressBuilder.Property(a => a.Country)
-                  .HasMaxLength(50);
-
-              addressBuilder.Property(a => a.State)
-                  .HasMaxLength(50);
-
-              addressBuilder.Property(a => a.ZipCode)
-                  .HasMaxLength(5)
-                  .IsRequired();
-          });
-
-        builder.ComplexProperty(
-               o => o.Payment, paymentBuilder =>
-               {
-                   paymentBuilder.Property(p => p.CardName)
-                       .HasMaxLength(50);
-
-                   paymentBuilder.Property(p => p.CardNumber)
-                       .HasMaxLength(24)
-                       .IsRequired();
-
-                   paymentBuilder.Property(p => p.Expiration)
-                       .HasMaxLength(10);
-
-                   paymentBuilder.Property(p => p.CVV)
-                       .HasMaxLength(3);
-
-                   paymentBuilder.Property(p => p.PaymentMethod);
-               });
-
+        // Map EOrderStatus (Enum)
         builder.Property(o => o.Status)
-            .HasDefaultValue(EOrderStatus.Draft)
-            .HasConversion(
-                s => s.ToString(),
-                dbStatus => (EOrderStatus)Enum.Parse(typeof(EOrderStatus), dbStatus));
+               .HasConversion<string>()
+               .HasDefaultValue(EOrderStatus.Pending);
 
-        builder.Property(o => o.TotalPrice);
+        // Map decimal TotalPrice
+        builder.Property(o => o.TotalPrice)
+               .HasPrecision(18, 2)
+               .IsRequired();
+
+        // Map OrderCode
+        builder.Property(o => o.OrderCode)
+               .HasMaxLength(50)
+               .IsRequired();
+
+        // Map PayDate and TransactionId
+        builder.Property(o => o.PayDate).IsRequired();
+        builder.Property(o => o.TransactionId).IsRequired();
+
+        // Map relationship with OrderItems
+        builder.HasMany(o => o.OrderItems)
+               .WithOne()
+               .HasForeignKey(oi => oi.OrderId)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }

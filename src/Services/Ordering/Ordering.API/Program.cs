@@ -1,6 +1,7 @@
 using Ordering.API;
 using Ordering.Application;
 using Ordering.Infrastructure;
+using Ordering.Payment.Models;
 using Ordering.Payment.Services;
 using Ordering.Payment.Services.Impls;
 
@@ -14,7 +15,7 @@ builder.Services
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IPaymentFactory, PaymentFactory>();
-
+builder.Services.Configure<BillingSettingOptions>(builder.Configuration.GetSection(BillingSettingOptions.BillingSetting));
 builder.Services.AddHttpClient("CatalogService", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["CATALOG_API_URL"] ?? "https://localhost:6069");
