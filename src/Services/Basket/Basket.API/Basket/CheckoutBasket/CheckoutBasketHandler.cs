@@ -1,12 +1,12 @@
-﻿
+﻿using Basket.API.EventHandler;
 using BuildingBlocks.Messaging.Events;
 using MassTransit;
 
 namespace Basket.API.Basket.CheckoutBasket;
 
-public record CheckoutBasketCommand(BasketCheckoutDto BasketCheckoutDto) 
+public record CheckoutBasketCommand(BasketCheckoutDto BasketCheckoutDto)
     : ICommand<CheckoutBasketResult>;
-public record CheckoutBasketResult(bool IsSuccess);
+public record CheckoutBasketResult(bool IsSuccess, string? PaymentUrl);
 
 public class CheckoutBasketCommandValidator : AbstractValidator<CheckoutBasketCommand>
 {
@@ -25,31 +25,45 @@ public class CheckoutBasketCommandValidator : AbstractValidator<CheckoutBasketCo
     }
 }
 
-public class CheckoutBasketCommandHandler
-    (IBasketRepository repository, IPublishEndpoint publishEndpoint)
-    : ICommandHandler<CheckoutBasketCommand, CheckoutBasketResult>
+public class CheckoutBasketCommandHandler : ICommandHandler<CheckoutBasketCommand, CheckoutBasketResult>
 {
+    private readonly IBasketRepository _repository;
+    private readonly IPublishEndpoint _publishEndpoint;
+
+    public CheckoutBasketCommandHandler(IBasketRepository repository, IPublishEndpoint publishEndpoint)
+    {
+        _repository = repository;
+        _publishEndpoint = publishEndpoint;
+    }
+
     public async Task<CheckoutBasketResult> Handle(CheckoutBasketCommand command, CancellationToken cancellationToken)
     {
-        // get existing basket with total price
-        // Set totalprice on basketcheckout event message
-        // send basket checkout event to rabbitmq using masstransit
-        // delete the basket
-
-        var basket = await repository.GetBasket(command.BasketCheckoutDto.UserId, cancellationToken);
+        var basket = await _repository.GetBasket(command.BasketCheckoutDto.UserId, cancellationToken);
         if (basket == null)
         {
-            return new CheckoutBasketResult(false);
+            return new CheckoutBasketResult(false, null);
         }
 
         var eventMessage = command.BasketCheckoutDto.Adapt<BasketCheckoutEvent>();
         eventMessage.TotalPrice = basket.TotalPrice;
 
-        await publishEndpoint.Publish(eventMessage, cancellationToken);
+        var userId = command.BasketCheckoutDto.UserId.ToString();
+        var paymentUrlTcs = PaymentUrlCreatedEventConsumer.RegisterPaymentUrlTask(userId);
 
-        //Wait for OrderConfirmedEvent
-        //await repository.DeleteBasket(command.BasketCheckoutDto.UserId, cancellationToken);
+        await _publishEndpoint.Publish(eventMessage, cancellationToken);
 
-        return new CheckoutBasketResult(true);
+        var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+        var completedTask = await Task.WhenAny(paymentUrlTcs.Task, timeoutTask);
+
+        if (completedTask == timeoutTask)
+        {
+            return new CheckoutBasketResult(false, null);
+        }
+
+        var paymentUrl = await paymentUrlTcs.Task;
+
+        await _repository.DeleteBasket(command.BasketCheckoutDto.UserId, cancellationToken);
+
+        return new CheckoutBasketResult(true, paymentUrl);
     }
 }

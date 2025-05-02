@@ -13,8 +13,8 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
 {
     private readonly ISender _sender;
     private readonly ILogger<BasketCheckoutEventHandler> _logger;
-    private readonly IHttpClientFactory _httpClientFactory; // Để gọi Catalog Service
-    private readonly IPublishEndpoint _publishEndpoint; // Để gửi PaymentUrlCreatedEvent
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public BasketCheckoutEventHandler(
         ISender sender,
@@ -32,13 +32,6 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
     {
         _logger.LogInformation("Processing BasketCheckoutEvent for UserId: {UserId}", context.Message.UserId);
 
-        // Bước 1: Xác thực sản phẩm với Catalog Service
-        //var products = await ValidateProducts(context.Message.Items);
-        //if (products == null)
-        //{
-        //    _logger.LogError("Product validation failed for BasketCheckoutEvent");
-        //    return; // Có thể gửi sự kiện lỗi nếu cần
-        //}
         var products = context.Message.Items;
 
         // Bước 2: Tạo lệnh CreateOrderCommand
@@ -66,61 +59,6 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         await _publishEndpoint.Publish(paymentUrlEvent, context.CancellationToken);
         _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", orderId.Id);
     }
-
-    //private async Task<List<CatalogProductDto>?> ValidateProducts(List<BasketItem> items)
-    //{
-    //    var client = _httpClientFactory.CreateClient("CatalogService");
-    //    var productIds = items.Select(i => i.ProductId).ToList();
-    //    var response = await client.PostAsJsonAsync("/api/products/bulk", productIds);
-
-    //    if (!response.IsSuccessStatusCode)
-    //    {
-    //        _logger.LogError("Failed to fetch products from Catalog Service");
-    //        return null;
-    //    }
-
-    //    var products = await response.Content.ReadFromJsonAsync<List<CatalogProductDto>>();
-    //    if (products == null || products.Count != items.Count)
-    //    {
-    //        _logger.LogError("Product count mismatch or null response from Catalog Service");
-    //        return null;
-    //    }
-
-    //    // Kiểm tra giá và tồn kho
-    //    foreach (var item in items)
-    //    {
-    //        var product = products.FirstOrDefault(p => p.Id == item.ProductId);
-    //        if (product == null)
-    //        {
-    //            _logger.LogError("Product not found: ProductId={ProductId}", item.ProductId);
-    //            return null;
-    //        }
-
-    //        var variant = product.Variants.FirstOrDefault(v =>
-    //            v.Properties.All(p => item.VariantProperties.Any(vp => vp.Type == p.Type && vp.Value == p.Value)));
-    //        if (variant == null)
-    //        {
-    //            _logger.LogError("Variant not found for ProductId={ProductId}", item.ProductId);
-    //            return null;
-    //        }
-
-    //        if (variant.Price != item.UnitPrice)
-    //        {
-    //            _logger.LogWarning("Price mismatch for ProductId={ProductId}. Expected={Expected}, Actual={Actual}",
-    //                item.ProductId, variant.Price, item.UnitPrice);
-    //            return null;
-    //        }
-
-    //        if (variant.StockCount < item.Quantity)
-    //        {
-    //            _logger.LogError("Insufficient stock for ProductId={ProductId}. Requested={Requested}, Available={Available}",
-    //                item.ProductId, item.Quantity, variant.StockCount);
-    //            return null;
-    //        }
-    //    }
-
-    //    return products;
-    //}
 
     private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<BasketItem> products)
     {
