@@ -26,9 +26,18 @@ builder.Services.AddHttpClient("OrderingService", client =>
     client.BaseAddress = new Uri(builder.Configuration["ORDER_API_URL"] ?? "http://localhost:6003");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 var app = builder.Build();
-
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 app.UseApiServices();
 

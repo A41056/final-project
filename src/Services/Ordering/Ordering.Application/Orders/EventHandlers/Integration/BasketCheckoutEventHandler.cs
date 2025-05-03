@@ -131,7 +131,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
                 OrderId: orderId,
                 ProductId: i.ProductId,
                 Quantity: i.Quantity,
-                Price: i.UnitPrice,
+                Price: i.UnitPrice * 1000,
                 VariantProperties: i.VariantProperties.Select(vp => new Dtos.VariantPropertyDto
                 {
                     Type = vp.Type,
