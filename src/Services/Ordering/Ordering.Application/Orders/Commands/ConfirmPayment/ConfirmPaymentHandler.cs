@@ -88,9 +88,10 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         }
 
         // Sử dụng IApplicationDbContext để truy vấn Order
+        var orderId = OrderId.Of(transactionId);
         var order = await _dbContext.Orders
-            .Include(o => o.OrderItems) // Bao gồm OrderItems để tính totalPayment
-            .FirstOrDefaultAsync(o => o.TransactionId == transactionId, cancellationToken);
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
         if (order == null)
         {
@@ -192,6 +193,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         // Placeholder: Publish events for Catalog (stock), Invoice, etc.
         // Example:
         // await _eventBus.Publish(new OrderConfirmedEvent(order.OrderCode, order.OrderItems));
-        await Task.CompletedTask; // Thay bằng xuất bản sự kiện thực tế
+        await Task.CompletedTask;
     }
 }
