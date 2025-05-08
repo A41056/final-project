@@ -1,6 +1,4 @@
-﻿using Marten;
-using Marten.Schema;
-using Catalog.API.Models;
+﻿using Marten.Schema;
 
 namespace Catalog.API.Data;
 
@@ -31,6 +29,7 @@ public class CatalogInitialData : IInitialData
         {
             Id = Guid.NewGuid(),
             Name = "Smart Phone",
+            Slug = "smart-phone",
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow,
             IsActive = true
@@ -39,6 +38,7 @@ public class CatalogInitialData : IInitialData
         {
             Id = Guid.NewGuid(),
             Name = "White Appliances",
+            Slug = "white-appliances",
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow,
             IsActive = true
@@ -47,6 +47,7 @@ public class CatalogInitialData : IInitialData
         {
             Id = Guid.NewGuid(),
             Name = "Home Kitchen",
+            Slug = "home-kitchen",
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow,
             IsActive = true
@@ -55,6 +56,7 @@ public class CatalogInitialData : IInitialData
         {
             Id = Guid.NewGuid(),
             Name = "Camera",
+            Slug = "camera",
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow,
             IsActive = true

@@ -1,6 +1,18 @@
 ﻿namespace Catalog.API.Categories.CreateCategory;
 
-public record CreateCategoryCommand(List<string> Names, bool IsActive) : ICommand<CreateCategoryResult>;
+using Catalog.API.Extensions;
+using Marten;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+public record CreateCategoryCommand(
+    string Names,
+    bool IsActive,
+    Guid? ParentId = null
+) : ICommand<CreateCategoryResult>;
 public record CreateCategoryResult(List<Guid> CreatedIds, List<string> Duplicates);
 
 public class CreateCategoryHandler : ICommandHandler<CreateCategoryCommand, CreateCategoryResult>
@@ -14,22 +26,48 @@ public class CreateCategoryHandler : ICommandHandler<CreateCategoryCommand, Crea
 
     public async Task<CreateCategoryResult> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
     {
+        var nameList = command.Names
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct()
+            .ToList();
+
+        if (!nameList.Any())
+        {
+            return new CreateCategoryResult(new List<Guid>(), new List<string>());
+        }
+
+        var slugList = nameList.Select(n => StringExtensions.GenerateSlug(n)).ToList();
+
         var existingCategories = await _session.Query<Category>()
-            .Where(c => command.Names.Contains(c.Name))
+            .Where(c => c.Name.In(nameList) || c.Slug.In(slugList))
             .ToListAsync(cancellationToken);
 
         var existingNames = existingCategories.Select(c => c.Name).ToHashSet();
-        var duplicates = command.Names.Where(name => existingNames.Contains(name)).ToList();
-        var namesToAdd = command.Names.Where(name => !existingNames.Contains(name)).Distinct().ToList();
+        var existingSlugs = existingCategories.Select(c => c.Slug).ToHashSet();
+        var duplicates = new List<string>();
+        var categoriesToAdd = new List<(string Name, string Slug)>();
+
+        foreach (var name in nameList)
+        {
+            var slug = StringExtensions.GenerateSlug(name);
+            if (existingNames.Contains(name) || existingSlugs.Contains(slug))
+            {
+                duplicates.Add(name);
+                continue;
+            }
+            categoriesToAdd.Add((name, slug));
+        }
 
         var createdIds = new List<Guid>();
 
-        foreach (var name in namesToAdd)
+        foreach (var (name, slug) in categoriesToAdd)
         {
             var category = new Category
             {
                 Id = Guid.NewGuid(),
                 Name = name,
+                Slug = slug,
+                ParentId = command.ParentId,
                 Created = DateTime.UtcNow,
                 Modified = DateTime.UtcNow,
                 IsActive = command.IsActive

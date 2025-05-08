@@ -1,18 +1,27 @@
-﻿namespace Review.API.Reviews.GetReviewByProductId;
+﻿using BuildingBlocks.Pagination;
+using BuildingBlocks.CQRS;
+using Marten;
 
-public record GetReviewByProductQuery(Guid productId) : IQuery<GetReviewByProductResult>;
-public record GetReviewByProductResult(IEnumerable<Models.Review> Reviews);
+namespace Review.API.Reviews.GetReviewByProductId;
 
-internal class GetReviewByProductQueryHandler
-    (IDocumentSession session)
+public record GetReviewByProductQuery(Guid ProductId, int? PageNumber = 1, int? PageSize = 10)
+    : IQuery<GetReviewByProductResult>;
+
+public record GetReviewByProductResult(IEnumerable<Models.Review> Reviews, int TotalItems);
+
+internal class GetReviewByProductQueryHandler(IDocumentSession session)
     : IQueryHandler<GetReviewByProductQuery, GetReviewByProductResult>
 {
     public async Task<GetReviewByProductResult> Handle(GetReviewByProductQuery query, CancellationToken cancellationToken)
     {
-        var products = await session.Query<Models.Review>()
-            .Where(p => p.ProductId == query.productId)
-            .ToListAsync(cancellationToken);
+        var reviewQuery = session.Query<Models.Review>()
+            .Where(p => p.ProductId == query.ProductId);
 
-        return new GetReviewByProductResult(products);
+        var totalItems = await reviewQuery.CountAsync(cancellationToken);
+
+        var reviews = await reviewQuery
+            .ToPagedListAsync(query.PageNumber ?? 1, query.PageSize ?? 10, cancellationToken);
+
+        return new GetReviewByProductResult(reviews, totalItems);
     }
 }

@@ -3,7 +3,7 @@
 public record GetCategoryByIdQuery(Guid Id) : IQuery<GetCategoryByIdResult>;
 public record GetCategoryByIdResult(Category Category);
 
-internal class GetCategoryByIdQueryHandler
+internal class GetCategoryByIdQueryHandler 
     (IDocumentSession session)
     : IQueryHandler<GetCategoryByIdQuery, GetCategoryByIdResult>
 {
