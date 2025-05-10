@@ -1,4 +1,6 @@
-﻿namespace Catalog.API.Products.CreateProduct;
+﻿using Catalog.API.Extensions;
+
+namespace Catalog.API.Products.CreateProduct;
 
 public record CreateProductCommand(
     string Name,
@@ -7,6 +9,7 @@ public record CreateProductCommand(
     List<string> ImageFiles,
     bool IsHot,
     bool IsActive,
+    List<string> Tags,
     List<ProductVariant> Variants
 ) : ICommand<CreateProductResult>;
 
@@ -51,6 +54,7 @@ internal class CreateProductHandler(IDocumentSession session)
             IsHot = command.IsHot,
             IsActive = command.IsActive,
             Variants = command.Variants,
+            Tags = command.Tags.Select(x => x.NormalizeTag()).ToList(),
             AverageRating = 0.0,
             Created = DateTime.UtcNow,
             Modified = DateTime.UtcNow

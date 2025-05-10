@@ -1,8 +1,9 @@
-﻿using Catalog.API.Products.CreateProduct;
+﻿using Catalog.API.Extensions;
+using Catalog.API.Products.CreateProduct;
 
 namespace Catalog.API.Products.UpdateProduct;
 
-public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, bool IsHot, bool IsActive, List<ProductVariant> Variants)
+public record UpdateProductCommand(Guid Id, string Name, List<Guid> Category, string Description, List<string> ImageFiles, bool IsHot, bool IsActive, List<string> Tags, List<ProductVariant> Variants)
     : ICommand<UpdateProductResult>;
 public record UpdateProductResult(bool IsSuccess);
 
@@ -36,6 +37,7 @@ internal class UpdateProductCommandHandler
         product.ImageFiles = command.ImageFiles;
         product.IsHot = command.IsHot;
         product.IsActive = command.IsActive;
+        product.Tags = command.Tags.Select(x => x.NormalizeTag()).ToList();
         product.Variants = command.Variants;
         product.Modified = DateTime.UtcNow;
 

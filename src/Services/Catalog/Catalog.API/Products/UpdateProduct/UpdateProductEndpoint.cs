@@ -8,6 +8,7 @@ public record UpdateProductRequest(
     List<string> ImageFiles,
     bool IsHot,
     bool IsActive,
+    List<string> Tags,
     List<ProductVariant> Variants
 );
 public record UpdateProductResponse(bool IsSuccess);
@@ -27,6 +28,7 @@ public class UpdateProductEndpoint : ICarterModule
                     request.ImageFiles,
                     request.IsHot,
                     request.IsActive,
+                    request.Tags,
                     request.Variants
                 );
 

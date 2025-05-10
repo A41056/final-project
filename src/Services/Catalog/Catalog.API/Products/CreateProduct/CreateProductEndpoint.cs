@@ -7,6 +7,7 @@ public record CreateProductRequest(
     List<string> ImageFiles,
     bool IsHot,
     bool IsActive,
+    List<string> Tags,
     List<ProductVariant> Variants
 );
 

@@ -113,7 +113,7 @@ public class CatalogInitialData : IInitialData
             Name = "IPhone X",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-1.png" },
-            CategoryIds = new List<Guid> { categoryDict["Smart Phone"] },
+            CategoryIds = new List<Guid> { categoryDict["Điện thoại"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>
@@ -141,7 +141,7 @@ public class CatalogInitialData : IInitialData
             Name = "Samsung 10",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-2.png" },
-            CategoryIds = new List<Guid> { categoryDict["Smart Phone"] },
+            CategoryIds = new List<Guid> { categoryDict["Điện thoại"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>
@@ -169,7 +169,7 @@ public class CatalogInitialData : IInitialData
             Name = "Huawei Plus",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-3.png" },
-            CategoryIds = new List<Guid> { categoryDict["White Appliances"] },
+            CategoryIds = new List<Guid> { categoryDict["Gia Dụng"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>
@@ -197,7 +197,7 @@ public class CatalogInitialData : IInitialData
             Name = "Xiaomi Mi 9",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-4.png" },
-            CategoryIds = new List<Guid> { categoryDict["White Appliances"] },
+            CategoryIds = new List<Guid> { categoryDict["Gia Dụng"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>
@@ -225,7 +225,7 @@ public class CatalogInitialData : IInitialData
             Name = "HTC U11+ Plus",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-5.png" },
-            CategoryIds = new List<Guid> { categoryDict["Smart Phone"] },
+            CategoryIds = new List<Guid> { categoryDict["Điện thoại"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>
@@ -253,7 +253,7 @@ public class CatalogInitialData : IInitialData
             Name = "LG G7 ThinQ",
             Description = "This phone is the company's biggest change to its flagship smartphone in years. It includes a borderless.",
             ImageFiles = new List<string> { "product-6.png" },
-            CategoryIds = new List<Guid> { categoryDict["Home Kitchen"] },
+            CategoryIds = new List<Guid> { categoryDict["Nhà bếp"] },
             IsHot = false,
             IsActive = true,
             Variants = new List<ProductVariant>

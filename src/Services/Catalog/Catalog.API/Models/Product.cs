@@ -9,6 +9,7 @@
     public DateTime Created { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     public DateTime Modified { get; set; } = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
     public List<Guid> CategoryIds { get; set; } = new();
+    public List<string> Tags { get; set; } = new();
     public List<ProductVariant> Variants { get; set; } = new();
     public double AverageRating { get; set; } = 0;
 }

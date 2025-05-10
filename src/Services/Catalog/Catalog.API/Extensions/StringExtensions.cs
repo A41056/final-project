@@ -26,4 +26,23 @@ public static class StringExtensions
 
         return string.IsNullOrEmpty(slug) ? Guid.NewGuid().ToString() : slug;
     }
+
+    public static string NormalizeTag(this string tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag))
+            return string.Empty;
+
+        var normalized = tag.ToLowerInvariant()
+            .Normalize(NormalizationForm.FormD)
+            .Where(ch => char.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+            .Aggregate(new StringBuilder(), (sb, ch) => sb.Append(ch))
+            .ToString();
+
+        normalized = Regex.Replace(normalized, @"\s+", "-");
+        normalized = Regex.Replace(normalized, @"[^a-z0-9-]", "");
+        normalized = Regex.Replace(normalized, @"-+", "-");
+        normalized = normalized.Trim('-');
+
+        return normalized;
+    }
 }
