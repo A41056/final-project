@@ -1,24 +1,19 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using BuildingBlocks.Messaging.MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Notification.API;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddMarten(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("Database"));
-    options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.All;
-    options.Schema.For<User.API.Models.User>();
-});
-
-if (builder.Environment.IsDevelopment())
-    builder.Services.InitializeMartenWith<UserInitialData>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = jwtSettings["Key"];
 var issuer = jwtSettings["Issuer"];
 var audience = jwtSettings["Audience"];
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -30,13 +25,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
             ValidAudience = audience,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key)
-            )
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
         };
         options.RequireHttpsMetadata = false;
     });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -47,25 +39,23 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
-builder.Services.AddAuthorization();
-builder.Services.AddCarter();
+builder.Services.AddMessageBroker(builder.Configuration, Assembly.GetExecutingAssembly());
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 app.UseCors("AllowAll");
-
-app.Use(async (context, next) =>
-{
-    Console.WriteLine($"Request: {context.Request.Method} {context.Request.Path}");
-    var headers = context.Request.Headers["Authorization"];
-    Console.WriteLine($"Authorization Header: {headers}");
-    await next(context);
-    Console.WriteLine($"Response: {context.Response.StatusCode}");
-});
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapCarter();
+app.MapHub<NotificationHub>("/hub/notifications");
 
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
 app.Run();

@@ -103,6 +103,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         var orderDto = new OrderDto(
             Id: orderId,
             CustomerId: message.CustomerId,
+            OrderCode: null,
             OrderName: message.UserName,
             ShippingAddress: addressDto,
             BillingAddress: addressDto,

@@ -37,22 +37,20 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174") // Origin của frontend
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
     });
 });
 
-// Thêm Authorization với chính sách mặc định
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser() // Yêu cầu tất cả endpoint phải xác thực
+        .RequireAuthenticatedUser()
         .Build();
 });
 
-// Đăng ký MediatR, Carter, Marten
 var assembly = typeof(Program).Assembly;
 builder.Services.AddMediatR(config =>
 {
@@ -94,12 +92,11 @@ app.Use(async (context, next) =>
 });
 
 app.UseExceptionHandler();
-// Middleware theo thứ tự đúng
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapCarter(); // MapCarter sẽ áp dụng chính sách mặc định
+app.MapCarter();
 
 app.UseHealthChecks("/health", new HealthCheckOptions
 {
