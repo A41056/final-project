@@ -20,7 +20,7 @@ public class PaymentUrlCreatedEventConsumer : IConsumer<PaymentUrlCreatedEvent>
         var notification = new
         {
             Title = "Xin chúc mừng bạn",
-            Message = $"Có đơn hàng mới {evt.OrderId}"
+            Message = $"Có đơn hàng mới {evt.OrderCode}"
         };
 
         await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification);

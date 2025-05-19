@@ -36,28 +36,28 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
 
         // Bước 2: Tạo lệnh CreateOrderCommand
         var command = await MapToCreateOrderCommand(context.Message, products);
-        var orderId = await _sender.Send(command);
+        var result = await _sender.Send(command);
 
-        _logger.LogInformation("Draft order created: OrderId={OrderId}", orderId.Id);
+        _logger.LogInformation("Draft order created: OrderId={OrderId}", result.Id);
 
         // Bước 3: Tạo URL thanh toán VNPay
-        var paymentUrl = await GeneratePaymentUrl(context.Message, orderId.Id);
+        var paymentUrl = await GeneratePaymentUrl(context.Message, result.Id);
         if (string.IsNullOrEmpty(paymentUrl))
         {
-            _logger.LogError("Failed to generate VNPay payment URL for OrderId: {OrderId}", orderId.Id);
+            _logger.LogError("Failed to generate VNPay payment URL for OrderId: {OrderId}", result.Id);
             return; // Có thể gửi sự kiện lỗi nếu cần
         }
 
         // Bước 4: Gửi sự kiện PaymentUrlCreatedEvent để thông báo client
         var paymentUrlEvent = new PaymentUrlCreatedEvent
         {
-            OrderId = orderId.Id,
+            OrderCode = result.OrderCode,
             UserId = context.Message.UserId,
             PaymentUrl = paymentUrl
         };
 
         await _publishEndpoint.Publish(paymentUrlEvent, context.CancellationToken);
-        _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", orderId.Id);
+        _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", result.Id);
     }
 
     private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<BasketItem> products)

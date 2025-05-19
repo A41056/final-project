@@ -2,7 +2,7 @@
 {
     public record PaymentUrlCreatedEvent : IntegrationEvent
     {
-        public Guid OrderId { get; init; }
+        public string OrderCode { get; init; }
         public Guid UserId { get; init; }
         public string PaymentUrl { get; init; } = string.Empty;
     }

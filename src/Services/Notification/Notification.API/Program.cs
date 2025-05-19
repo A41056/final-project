@@ -44,8 +44,8 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
 app.UseRouting();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<NotificationHub>("/hub/notifications");
@@ -57,5 +57,5 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.Run();
