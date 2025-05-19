@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using User.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<GoogleLoginService>();
+builder.Services.AddScoped<FacebookLoginService>();
+builder.Services.AddSingleton<SocialLoginFactory>();
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();
 

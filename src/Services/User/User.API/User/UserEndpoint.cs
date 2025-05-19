@@ -2,7 +2,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using User.API.Dtos;
 using User.API.Helpers;
+using User.API.Services;
 
 namespace User.API.User;
 
@@ -75,6 +77,49 @@ public class UserEndpoint : ICarterModule
                 RoleId = user.RoleId,
                 CreatedDate = user.CreatedDate,
                 ModifiedDate = user.ModifiedDate
+            };
+
+            return Results.Ok(new { Token = token, User = userDto });
+        }).AllowAnonymous();
+
+        app.MapPost("/external-login", async (
+    ExternalLoginDto dto,
+    SocialLoginFactory loginFactory,
+    IDocumentSession session,
+    IConfiguration config) =>
+        {
+            var service = loginFactory.GetService(dto.Provider);
+            var (isValid, email, firstName, lastName) = await service.VerifyTokenAsync(dto.AccessToken);
+
+            if (!isValid || string.IsNullOrEmpty(email))
+                return Results.Unauthorized();
+
+            var user = await session.Query<Models.User>().FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                user = new Models.User
+                {
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Username = email.Split('@')[0],
+                    IsActive = true,
+                    RoleId = Guid.Parse("user-role-id")
+                };
+
+                session.Store(user);
+                await session.SaveChangesAsync();
+            }
+
+            var token = GenerateJwtToken(user, config);
+            var userDto = new
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                RoleId = user.RoleId
             };
 
             return Results.Ok(new { Token = token, User = userDto });
