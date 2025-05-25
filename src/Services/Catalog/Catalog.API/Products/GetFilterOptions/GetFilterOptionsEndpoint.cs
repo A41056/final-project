@@ -12,6 +12,7 @@
                     return Results.Ok(result);
                 })
                 .WithName("GetFilterOptions")
+                .AllowAnonymous()
                 .Produces<FilterOptionsResult>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status404NotFound)
                 .WithSummary("Get product filter options by category slug")

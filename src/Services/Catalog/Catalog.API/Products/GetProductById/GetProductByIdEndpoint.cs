@@ -17,6 +17,7 @@ public class GetCategoryByIdEndpoint : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetProductById")
+        .AllowAnonymous()
         .Produces<GetProductByIdResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Product By Id")

@@ -54,7 +54,8 @@ namespace Catalog.API.Products.GetCategoryBySlug
                 ));
 
                 return Results.Ok(result);
-            });
+            })
+            .AllowAnonymous();
         }
     }
 }

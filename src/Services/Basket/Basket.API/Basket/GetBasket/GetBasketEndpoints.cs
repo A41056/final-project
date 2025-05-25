@@ -16,6 +16,7 @@ public class GetBasketEndpoints : ICarterModule
             return Results.Ok(respose);
         })
         .WithName("GetProductById")
+        .RequireAuthorization()
         .Produces<GetBasketResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Product By Id")

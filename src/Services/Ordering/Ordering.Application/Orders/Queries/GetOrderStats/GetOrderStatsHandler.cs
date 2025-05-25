@@ -29,7 +29,7 @@ namespace Ordering.Application.Orders.Queries.GetOrderStats
                     dbContext.Orders
                         .Include(o => o.OrderItems)
                         .AsNoTracking()
-                        .Where(o => o.PayDate >= previousFrom && o.PayDate <= currentTo),
+                        .Where(o => o.PayDate >= previousFrom && o.PayDate < currentTo),
                     ct
                 );
 
@@ -72,14 +72,17 @@ namespace Ordering.Application.Orders.Queries.GetOrderStats
             => CalcPercentChange((decimal)oldVal, (decimal)newVal);
 
         private static (DateTime currentFrom, DateTime currentTo, DateTime previousFrom, DateTime previousTo)
-            GetDateRanges(string range)
+    GetDateRanges(string range)
         {
-            var now = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow;
+            var today = now.Date;
+            var endOfToday = today.AddDays(1).AddTicks(-1);
+
             return range switch
             {
-                "1d" => (now, now, now.AddDays(-1), now.AddDays(-1)),
-                "28d" => (now.AddDays(-27), now, now.AddDays(-55), now.AddDays(-28)),
-                _ => (now.AddDays(-6), now, now.AddDays(-13), now.AddDays(-7)),
+                "1d" => (today, endOfToday, today.AddDays(-1), today.AddTicks(-1)),
+                "28d" => (today.AddDays(-27), endOfToday, today.AddDays(-55), today.AddDays(-28).AddTicks(-1)),
+                _ => (today.AddDays(-6), endOfToday, today.AddDays(-13), today.AddDays(-7).AddTicks(-1)),
             };
         }
     }

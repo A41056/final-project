@@ -22,6 +22,7 @@ public class GetOrdersByCustomer : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetOrdersByCustomer")
+        .RequireAuthorization()
         .Produces<GetOrdersByCustomerResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)

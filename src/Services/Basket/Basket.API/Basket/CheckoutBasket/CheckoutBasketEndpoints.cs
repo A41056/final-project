@@ -18,6 +18,7 @@ public class CheckoutBasketEndpoints : ICarterModule
             return Results.Ok(response);
         })
         .WithName("CheckoutBasket")
+        .RequireAuthorization()
         .Produces<CheckoutBasketResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Checkout Basket")

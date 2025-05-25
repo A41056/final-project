@@ -18,7 +18,7 @@ public class GetCategoriesEndpoint : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetCategories")
-        .RequireAuthorization()
+        .AllowAnonymous()
         .Produces<GetCategoriesResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Categories")

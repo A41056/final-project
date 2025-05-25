@@ -19,6 +19,7 @@
                 return Results.Ok(result);
             })
             .WithName("GetProductStats")
+            .RequireAuthorization()
             .Produces<ProductStatsDto>(StatusCodes.Status200OK)
             .WithSummary("Get product statistics for dashboard")
             .WithDescription("Returns total, active, hot, and out-of-stock product counts");

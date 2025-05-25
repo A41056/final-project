@@ -17,4 +17,6 @@ public class User
     public int LoginFailedCount { get; set; } = 0;
     public bool IsActive { get; set; } = true;
     public Guid RoleId { get; set; }
+    public string? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
 }

@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using User.API.Models;
 using User.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings:SMTPEmailSetting")
+);
 
 builder.Services.AddMarten(options =>
 {
@@ -52,6 +57,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<GoogleLoginService>();
 builder.Services.AddScoped<FacebookLoginService>();
 builder.Services.AddSingleton<SocialLoginFactory>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();
 

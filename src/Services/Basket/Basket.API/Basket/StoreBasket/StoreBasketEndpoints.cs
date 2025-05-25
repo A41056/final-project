@@ -18,6 +18,7 @@ public class StoreBasketEndpoints : ICarterModule
             return Results.Created($"/basket/{response.UserId}", response);
         })
         .WithName("CreateProduct")
+        .RequireAuthorization()
         .Produces<StoreBasketResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Create Product")

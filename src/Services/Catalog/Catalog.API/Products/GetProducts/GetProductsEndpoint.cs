@@ -39,6 +39,7 @@ public class GetProductsEndpoint : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetProducts")
+        .AllowAnonymous()
         .Produces<GetProductsResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Products")

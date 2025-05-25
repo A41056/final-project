@@ -16,7 +16,7 @@ public class GetCategoryPathEndpoint : ICarterModule
             return Results.Ok(result.Path);
         })
         .WithName("GetCategoryPath")
-        .RequireAuthorization()
+        .AllowAnonymous()
         .Produces<List<Category>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .WithSummary("Get category path")

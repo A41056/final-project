@@ -25,6 +25,7 @@ public class GetTopHotProductsEndpoint : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetTopHotProducts")
+        .AllowAnonymous()
         .Produces<GetTopHotProductsResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Top Hot Products")

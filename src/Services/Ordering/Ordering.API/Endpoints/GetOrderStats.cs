@@ -14,6 +14,7 @@ namespace Ordering.API.Endpoints
                 return Results.Ok(result);
             })
             .WithName("GetOrderStats")
+            .RequireAuthorization()
             .Produces<OrderStatsDto>(StatusCodes.Status200OK)
             .WithSummary("Get order statistics for dashboard")
             .WithDescription("Returns total orders, sales, change %, and chart data by date");

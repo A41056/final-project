@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using User.API.Dtos;
 using User.API.Helpers;
+using User.API.Models;
 using User.API.Services;
 
 namespace User.API.User;
@@ -59,6 +60,9 @@ public class UserEndpoint : ICarterModule
             }
 
             user.LoginFailedCount = 0;
+            user.RefreshToken = Guid.NewGuid().ToString();
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
             session.Store(user);
             await session.SaveChangesAsync();
 
@@ -79,7 +83,35 @@ public class UserEndpoint : ICarterModule
                 ModifiedDate = user.ModifiedDate
             };
 
-            return Results.Ok(new { Token = token, User = userDto });
+            return Results.Ok(new
+            {
+                Token = token,
+                RefreshToken = user.RefreshToken,
+                User = userDto
+            });
+        }).AllowAnonymous();
+
+        app.MapPost("/refresh-token", async (RefreshTokenDto dto, IDocumentSession session, IConfiguration config) =>
+        {
+            var user = await session.Query<Models.User>()
+                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.RefreshToken == dto.RefreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                return Results.Unauthorized();
+
+            var newToken = GenerateJwtToken(user, config);
+            var newRefreshToken = Guid.NewGuid().ToString();
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+            session.Store(user);
+            await session.SaveChangesAsync();
+
+            return Results.Ok(new
+            {
+                Token = newToken,
+                RefreshToken = newRefreshToken
+            });
         }).AllowAnonymous();
 
         app.MapPost("/external-login", async (
@@ -125,6 +157,47 @@ public class UserEndpoint : ICarterModule
             return Results.Ok(new { Token = token, User = userDto });
         }).AllowAnonymous();
 
+        app.MapPost("/reset-password", async (
+    ResetPasswordRequest request,
+    IDocumentSession session,
+    IEmailService emailService,
+    CancellationToken ct) =>
+        {
+            var user = await session.Query<Models.User>()
+                .FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive, ct);
+
+            if (user is null)
+                return Results.NotFound("User not found");
+
+            // Tạo mật khẩu mới
+            string newPassword = GenerateRandomPassword(10);
+
+            // Băm lại
+            var (hash, salt) = HashHelper.HashPassword(newPassword);
+            user.PasswordHash = hash;
+            user.PasswordSalt = salt;
+
+            session.Store(user);
+            await session.SaveChangesAsync(ct);
+
+            // Soạn email
+            var body = $"""
+        <p>Xin chào {user.FirstName + " " + user.LastName},</p>
+        <p>Bạn đã yêu cầu đặt lại mật khẩu. Dưới đây là mật khẩu mới của bạn:</p>
+        <p><strong>{newPassword}</strong></p>
+        <p>Vui lòng đăng nhập và thay đổi mật khẩu ngay sau đó.</p>
+    """;
+
+            await emailService.SendEmailAsync(new MailRequest
+            {
+                ToAddress = user.Email,
+                Subject = "Mật khẩu mới của bạn",
+                Body = body
+            }, ct);
+
+            return Results.Ok("Mật khẩu mới đã được gửi qua email");
+        }).AllowAnonymous();
+
         // Thêm người dùng (yêu cầu quyền admin)
         app.MapPost("/users", async (RegisterDto dto, IDocumentSession session, HttpContext context) =>
         {
@@ -153,25 +226,25 @@ public class UserEndpoint : ICarterModule
         }).RequireAuthorization();
 
         // Sửa thông tin người dùng
-         app.MapPut("/users/{id}", async (Guid id, UpdateUserDto dto, IDocumentSession session) =>
-        {
-            var user = await session.LoadAsync<Models.User>(id);
-            if (user == null || !user.IsActive) return Results.NotFound();
+        app.MapPut("/users/{id}", async (Guid id, UpdateUserDto dto, IDocumentSession session) =>
+       {
+           var user = await session.LoadAsync<Models.User>(id);
+           if (user == null || !user.IsActive) return Results.NotFound();
 
-            user.Username = dto.Username ?? user.Username;
-            user.Email = dto.Email ?? user.Email;
-            user.FirstName = dto.FirstName ?? user.FirstName;
-            user.LastName = dto.LastName ?? user.LastName;
-            user.Phone = dto.Phone ?? user.Phone;
-            user.Address = dto.Address ?? user.Address;
-            user.Gender = dto.Gender ?? user.Gender;
-            user.Age = dto.Age ?? user.Age;
-            user.ModifiedDate = DateTime.UtcNow;
+           user.Username = dto.Username ?? user.Username;
+           user.Email = dto.Email ?? user.Email;
+           user.FirstName = dto.FirstName ?? user.FirstName;
+           user.LastName = dto.LastName ?? user.LastName;
+           user.Phone = dto.Phone ?? user.Phone;
+           user.Address = dto.Address ?? user.Address;
+           user.Gender = dto.Gender ?? user.Gender;
+           user.Age = dto.Age ?? user.Age;
+           user.ModifiedDate = DateTime.UtcNow;
 
-            session.Store(user);
-            await session.SaveChangesAsync();
-            return Results.Ok("User updated successfully");
-        }).RequireAuthorization();
+           session.Store(user);
+           await session.SaveChangesAsync();
+           return Results.Ok("User updated successfully");
+       }).RequireAuthorization();
 
         // Xóa (de-active) người dùng
         app.MapDelete("/users/{id}", async (Guid id, IDocumentSession session) =>
@@ -248,21 +321,29 @@ public class UserEndpoint : ICarterModule
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("roleId", user.RoleId.ToString())
-        };
+        new Claim(JwtRegisteredClaimNames.Sub, user.Email!),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim("roleId", user.RoleId.ToString())
+    };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],
             audience: config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.UtcNow.AddMinutes(30),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GenerateRandomPassword(int length)
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

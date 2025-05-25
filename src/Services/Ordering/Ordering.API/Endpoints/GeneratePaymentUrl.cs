@@ -29,6 +29,7 @@ public class GeneratePaymentUrl : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GeneratePaymentUrl")
+        .RequireAuthorization()
         .Produces<GeneratePaymentUrlResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Generate Payment URL")

@@ -18,6 +18,7 @@ public class GetProductsWithRatingEndpoint : ICarterModule
             return Results.Ok(response);
         })
         .WithName("GetProductsWithRating")
+        .AllowAnonymous()
         .Produces<GetProductsWithRatingResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Get Products With Rating")

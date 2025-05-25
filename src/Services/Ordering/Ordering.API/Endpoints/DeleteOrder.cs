@@ -23,6 +23,7 @@ public class DeleteOrder : ICarterModule
             return Results.Ok(response);
         })
         .WithName("DeleteOrder")
+        .RequireAuthorization()
         .Produces<DeleteOrderResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
