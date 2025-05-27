@@ -1,0 +1,33 @@
+{
+  "family": "file-api-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "file-api-container",
+      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/file-api-container:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ConnectionStrings__Database",
+          "value": "Server=filedb;Port=5432;Database=FileDb;User Id=postgres;Password=root;Include Error Detail=true"
+        },
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Development"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+}

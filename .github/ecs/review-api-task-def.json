@@ -1,0 +1,37 @@
+{
+  "family": "review-api-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "review-api-container",
+      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/review-api-container:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ConnectionStrings__Database",
+          "value": "Server=reviewdb;Port=5432;Database=ReviewDb;User Id=postgres;Password=root;Include Error Detail=true"
+        },
+        {
+          "name": "MessageBroker__Host",
+          "value": "amqp://ecommerce-mq:5672"
+        },
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Development"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+}

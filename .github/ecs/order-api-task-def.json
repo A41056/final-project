@@ -1,0 +1,35 @@
+{
+  "family": "order-api-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "order-api-container",
+      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/order-api-container:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ConnectionStrings__Database",
+          "value": "Server=orderdb;Port=1433;Database=OrderDb;User Id=sa;Password=Quanggiap299@;Encrypt=False;TrustServerCertificate=True"
+        },
+        {
+          "name": "MessageBroker__Host",
+          "value": "amqp://ecommerce-mq:5672"
+        },
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Development"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [ "FARGATE" ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+}

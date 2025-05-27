@@ -1,0 +1,29 @@
+{
+  "family": "yarpapigateway-task",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "yarp-apigateway-container",
+      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/yarp-apigateway-container:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Development"
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+}
