@@ -15,7 +15,7 @@
       "environment": [
         {
           "name": "ConnectionStrings__Database",
-          "value": "Server=filedb;Port=5432;Database=FileDb;User Id=postgres;Password=root;Include Error Detail=true"
+          "value": "Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=FileDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require"
         },
         {
           "name": "ASPNETCORE_ENVIRONMENT",

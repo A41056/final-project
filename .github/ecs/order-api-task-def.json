@@ -15,7 +15,7 @@
       "environment": [
         {
           "name": "ConnectionStrings__Database",
-          "value": "Server=orderdb;Port=1433;Database=OrderDb;User Id=sa;Password=Quanggiap299@;Encrypt=False;TrustServerCertificate=True"
+          "value": "Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=OrderDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require"
         },
         {
           "name": "MessageBroker__Host",

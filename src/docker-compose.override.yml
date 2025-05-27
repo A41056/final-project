@@ -1,75 +1,75 @@
 version: '3.4'
 
 services:
-  catalogdb:
-    container_name: catalogdb
-    image: postgres:17
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=CatalogDb
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
-    ports:
-        - "5435:5432"
-    volumes:
-      - postgres_catalog:/var/lib/postgresql/data/ 
+  # catalogdb:
+  #   container_name: catalogdb
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #     - POSTGRES_DB=CatalogDb
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #   restart: always
+  #   ports:
+  #       - "5435:5432"
+  #   volumes:
+  #     - postgres_catalog:/var/lib/postgresql/data/ 
       
-  basketdb:
-    container_name: basketdb
-    image: postgres:17
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=BasketDb
-      - POSTGRES_HOST_AUTH_METHOD=trust 
-    restart: always
-    ports:
-        - "5433:5432"
-    volumes:
-      - postgres_basket:/var/lib/postgresql/data/ 
+  # basketdb:
+  #   container_name: basketdb
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #     - POSTGRES_DB=BasketDb
+  #     - POSTGRES_HOST_AUTH_METHOD=trust 
+  #   restart: always
+  #   ports:
+  #       - "5433:5432"
+  #   volumes:
+  #     - postgres_basket:/var/lib/postgresql/data/ 
 
-  userdb:
-    container_name: userdb
-    image: postgres:17
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=UserDb
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_user:/var/lib/postgresql/data/
+  # userdb:
+  #   container_name: userdb
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #     - POSTGRES_DB=UserDb
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #   restart: always
+  #   ports:
+  #     - "5434:5432"
+  #   volumes:
+  #     - postgres_user:/var/lib/postgresql/data/
 
-  reviewdb:
-    container_name: reviewdb
-    image: postgres:17
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=ReviewDb
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
-    ports:
-      - "5437:5432"
-    volumes:
-      - postgres_review:/var/lib/postgresql/data/
+  # reviewdb:
+  #   container_name: reviewdb
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #     - POSTGRES_DB=ReviewDb
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #   restart: always
+  #   ports:
+  #     - "5437:5432"
+  #   volumes:
+  #     - postgres_review:/var/lib/postgresql/data/
 
-  filedb:
-    container_name: filedb
-    image: postgres:17
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-      - POSTGRES_DB=FileDb
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
-    ports:
-      - "5438:5432"
-    volumes:
-      - postgres_file:/var/lib/postgresql/data/
+  # filedb:
+  #   container_name: filedb
+  #   image: postgres:17
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #     - POSTGRES_DB=FileDb
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #   restart: always
+  #   ports:
+  #     - "5438:5432"
+  #   volumes:
+  #     - postgres_file:/var/lib/postgresql/data/
 
   distributedcache:
     container_name: distributedcache
@@ -102,9 +102,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=userdb;Port=5432;Database=UserDb;User Id=postgres;Password=root;Include Error Detail=true
-    depends_on:
-      - userdb
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=UserDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+    # depends_on:
+    #   - userdb
     ports:
       - "6006:8080"
       - "6066:8081"
@@ -117,12 +117,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=reviewdb;Port=5432;Database=ReviewDb;User Id=postgres;Password=root;Include Error Detail=true
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=ReviewDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
     depends_on:
-      - reviewdb
+      # - reviewdb
       - messagebroker
     ports:
       - "6007:8080"
@@ -136,9 +136,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=filedb;Port=5432;Database=FileDb;User Id=postgres;Password=root;Include Error Detail=true
-    depends_on:
-      - filedb
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=FileDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+    # depends_on:
+      # - filedb
     ports:
       - "6010:8080"
       - "6070:8081"
@@ -151,12 +151,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=catalogdb;Port=5432;Database=CatalogDb;User Id=postgres;Password=root;Include Error Detail=true
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=CatalogDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest                 
       - MessageBroker__Password=guest
     depends_on:
-      - catalogdb
+      # - catalogdb
       - messagebroker
     ports:
       - "6009:8080"
@@ -170,14 +170,14 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=basketdb;Port=5432;Database=BasketDb;User Id=postgres;Password=root;Include Error Detail=true
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=BasketDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
       - ConnectionStrings__Redis=distributedcache:6379
       - GrpcSettings__DiscountUrl=https://discount.grpc:8081
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
     depends_on:
-      - basketdb
+      # - basketdb
       - distributedcache
       - discount.grpc
       - messagebroker
