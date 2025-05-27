@@ -4,7 +4,7 @@
   "containerDefinitions": [
     {
       "name": "order-api-container",
-      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/order-api-container:latest",
+      "image": "654654461467.dkr.ecr.us-east-1.amazonaws.com/order-api-container:latest",
       "portMappings": [
         {
           "containerPort": 80,
