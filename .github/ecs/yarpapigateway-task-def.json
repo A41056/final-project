@@ -3,8 +3,8 @@
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "yarp-apigateway-container",
-      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/yarp-apigateway-container:latest",
+      "name": "yarpapigateway-container",
+      "image": "654654461467.dkr.ecr.ap-southeast-1.amazonaws.com/yarpapigateway-container:latest",
       "portMappings": [
         {
           "containerPort": 80,
