@@ -92,7 +92,7 @@ jobs:
             dockerfile: src/Services/Discount/Discount.Grpc/Dockerfile
 
           - name: be-yarp-apigateway-task-service
-            ecr_repo: yarnapigateway-api
+            ecr_repo: yarpapigateway-api
             ecs_service: be-yarp-apigateway-task-service
             task_def: .github/ecs/yarpapigateway-task-def.json
             container_name: yarpapigateway-container
