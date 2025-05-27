@@ -1,4 +1,4 @@
-name: Deploy Backend Services to Amazon ECS
+name: Deploy Backend Services to Amazon ECS 
 
 on:
   push:
@@ -24,72 +24,81 @@ jobs:
             ecs_service: be-user-api-task-service
             task_def: .github/ecs/user-api-task-def.json
             container_name: user-api-container
-            docker_context: ./Services/User
-            dockerfile: User.API/Dockerfile
+            folder: User/User.API
+            docker_context: src
+            dockerfile: src/Services/User/User.API/Dockerfile
 
           - name: be-catalog-api-task-service
             ecr_repo: catalog-api
             ecs_service: be-catalog-api-task-service
             task_def: .github/ecs/catalog-api-task-def.json
             container_name: catalog-api-container
-            docker_context: ./Services/Catalog
-            dockerfile: Catalog.API/Dockerfile
+            folder: Catalog/Catalog.API
+            docker_context: src
+            dockerfile: src/Services/Catalog/Catalog.API/Dockerfile
 
           - name: be-basket-api-task-service
             ecr_repo: basket-api
             ecs_service: be-basket-api-task-service
             task_def: .github/ecs/basket-api-task-def.json
             container_name: basket-api-container
-            docker_context: ./Services/Basket
-            dockerfile: Basket.API/Dockerfile
+            folder: Basket/Basket.API
+            docker_context: src
+            dockerfile: src/Services/Basket/Basket.API/Dockerfile
 
           - name: be-review-api-task-service
             ecr_repo: review-api
             ecs_service: be-review-api-task-service
             task_def: .github/ecs/review-api-task-def.json
             container_name: review-api-container
-            docker_context: ./Services/Review
-            dockerfile: Review.API/Dockerfile
+            folder: Review/Review.API
+            docker_context: src
+            dockerfile: src/Services/Review/Review.API/Dockerfile
 
           - name: be-file-api-task-service
             ecr_repo: file-api
             ecs_service: be-file-api-task-service
             task_def: .github/ecs/file-api-task-def.json
             container_name: file-api-container
-            docker_context: ./Services/Media
-            dockerfile: Media.API/Dockerfile
+            folder: Media/Media.API
+            docker_context: src
+            dockerfile: src/Services/Media/Media.API/Dockerfile
 
           - name: be-order-api-task-service
             ecr_repo: order-api
             ecs_service: be-order-api-task-service
             task_def: .github/ecs/order-api-task-def.json
             container_name: order-api-container
-            docker_context: ./Services/Ordering
-            dockerfile: Ordering.API/Dockerfile
+            folder: Ordering/Ordering.API
+            docker_context: src
+            dockerfile: src/Services/Ordering/Ordering.API/Dockerfile
 
           - name: be-notification-api-task-service
             ecr_repo: notification-api
             ecs_service: be-notification-api-task-service
             task_def: .github/ecs/notification-api-task-def.json
             container_name: notification-api-container
-            docker_context: ./Services/Notification
-            dockerfile: Notification.API/Dockerfile
+            folder: Notification/Notification.API
+            docker_context: src
+            dockerfile: src/Services/Notification/Notification.API/Dockerfile
 
           - name: be-discount-api-task-service
             ecr_repo: discount-api
             ecs_service: be-discount-api-task-service
             task_def: .github/ecs/discount-grpc-task-def.json
             container_name: discount-api-container
-            docker_context: ./Services/Discount/Discount.Grpc
-            dockerfile: Dockerfile
+            folder: Discount/Discount.Grpc
+            docker_context: src
+            dockerfile: src/Services/Discount/Discount.Grpc/Dockerfile
 
           - name: be-yarp-apigateway-task-service
             ecr_repo: yarpapigateway-api
             ecs_service: be-yarp-apigateway-task-service
             task_def: .github/ecs/yarpapigateway-task-def.json
             container_name: yarpapigateway-container
-            docker_context: ./ApiGateways/YarpApiGateway
-            dockerfile: Dockerfile
+            folder: YarpApiGateway
+            docker_context: src
+            dockerfile: src/ApiGateways/YarpApiGateway/Dockerfile
 
     steps:
       - name: Checkout code
@@ -113,8 +122,8 @@ jobs:
           ECR_REGISTRY: ${{ env.ECR_REGISTRY }}
           ECR_REPOSITORY: ${{ matrix.service.ecr_repo }}
         run: |
-          DOCKERFILE_PATH="src/Services/${{ matrix.service.folder }}/Dockerfile"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f $DOCKERFILE_PATH src
+          echo "Building service ${{ matrix.service.name }}"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ${{ matrix.service.dockerfile }} ${{ matrix.service.docker_context }}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
