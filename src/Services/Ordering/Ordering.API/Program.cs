@@ -1,11 +1,37 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Ordering.API;
 using Ordering.Application;
 using Ordering.Infrastructure;
 using Ordering.Payment.Models;
 using Ordering.Payment.Services;
 using Ordering.Payment.Services.Impls;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = jwtSettings["Key"];
+var issuer = jwtSettings["Issuer"];
+var audience = jwtSettings["Audience"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(key)
+            )
+        };
+        options.RequireHttpsMetadata = false;
+    });
 
 // Add services to the container.
 builder.Services
@@ -36,6 +62,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
@@ -45,5 +74,7 @@ app.UseApiServices();
 //{
 //    await app.InitialiseDatabaseAsync();
 //}
-
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();

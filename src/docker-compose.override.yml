@@ -117,7 +117,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=ReviewDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+      - ConnectionStrings__Database=Host=ep-snowy-credit-a4ogtygi-pooler.us-east-1.aws.neon.tech;Database=ReviewDb;Username=neondb_owner;Password=npg_DyTZ8Qq9IiOx;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
@@ -136,7 +136,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=FileDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+      - ConnectionStrings__Database=Host=ep-snowy-credit-a4ogtygi-pooler.us-east-1.aws.neon.tech;Database=FileDb;Username=neondb_owner;Password=npg_DyTZ8Qq9IiOx;SslMode=Require
     # depends_on:
       # - filedb
     ports:
@@ -151,7 +151,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=CatalogDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+      - ConnectionStrings__Database=Host=ep-summer-wave-a4okjsea-pooler.us-east-1.aws.neon.tech;Database=CatalogDb;Username=neondb_owner;Password=npg_fXcpTMYN1ky8;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest                 
       - MessageBroker__Password=guest
@@ -170,7 +170,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=BasketDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
+      - ConnectionStrings__Database=Host=ep-summer-wave-a4okjsea-pooler.us-east-1.aws.neon.tech;Database=BasketDb;Username=neondb_owner;Password=npg_fXcpTMYN1ky8;SslMode=Require
       - ConnectionStrings__Redis=distributedcache:6379
       - GrpcSettings__DiscountUrl=https://discount.grpc:8081
       - MessageBroker__Host=amqp://ecommerce-mq:5672
@@ -206,7 +206,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__Database=Server=host.docker.internal,1433;Database=OrderDb;User Id=sa;Password=Quanggiap299@;Encrypt=False;TrustServerCertificate=True
+      - ConnectionStrings__Database=Host=ep-withered-mode-abvpn191-pooler.eu-west-2.aws.neon.tech;Database=OrderDb;Username=neondb_owner;Password=npg_iI0VlNtHxs7F;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest
@@ -226,6 +226,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Database=Host=ep-summer-wave-a4okjsea-pooler.us-east-1.aws.neon.tech;Database=NotificationDb;Username=neondb_owner;Password=npg_fXcpTMYN1ky8;SslMode=Require
       - MessageBroker__Host=amqp://ecommerce-mq:5672
       - MessageBroker__UserName=guest
       - MessageBroker__Password=guest

@@ -1,7 +1,10 @@
 using BuildingBlocks.Messaging.MassTransit;
+using Carter;
+using Marten;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Notification.API;
+using Notification.API.Data;
 using System.Reflection;
 using System.Text;
 
@@ -41,8 +44,28 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddMessageBroker(builder.Configuration, Assembly.GetExecutingAssembly());
 builder.Services.AddSignalR();
+builder.Services.AddCarter();
+var assembly = typeof(Program).Assembly;
+
+builder.Services.AddMediatR(config =>
+{
+    config.RegisterServicesFromAssembly(assembly);
+    config.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+});
+
+//Data Services
+builder.Services.AddMarten(opts =>
+{
+    opts.Connection(builder.Configuration.GetConnectionString("Database")!);
+}).UseLightweightSessions();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
 
 var app = builder.Build();
+
 
 app.UseRouting();
 app.UseCors("AllowAll");
@@ -50,12 +73,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<NotificationHub>("/hub/notifications");
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-//app.UseHttpsRedirection();
 app.Run();

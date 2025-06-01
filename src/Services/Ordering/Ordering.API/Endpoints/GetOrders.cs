@@ -22,12 +22,9 @@ public class GetOrders : ICarterModule
 
             return Results.Ok(response);
         })
-        .WithName("GetOrders")
         .RequireAuthorization()
         .Produces<GetOrdersResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status404NotFound)
-        .WithSummary("Get Orders")
-        .WithDescription("Get Orders");
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }

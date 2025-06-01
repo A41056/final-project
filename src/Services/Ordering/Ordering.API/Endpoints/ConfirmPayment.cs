@@ -35,7 +35,6 @@ public class ConfirmPayment : ICarterModule
             );
             return Results.Ok(response);
         })
-        .WithName("ConfirmPayment")
         .RequireAuthorization()
         .Produces<ConfirmPaymentResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)

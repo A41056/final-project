@@ -28,12 +28,9 @@ public class GeneratePaymentUrl : ICarterModule
             var response = new GeneratePaymentUrlResponse(result.PaymentUrl);
             return Results.Ok(response);
         })
-        .WithName("GeneratePaymentUrl")
         .RequireAuthorization()
         .Produces<GeneratePaymentUrlResponse>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .WithSummary("Generate Payment URL")
-        .WithDescription("Generates a payment URL for VNPay");
+        .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 }
 

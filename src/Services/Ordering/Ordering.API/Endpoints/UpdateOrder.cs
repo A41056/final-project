@@ -24,11 +24,8 @@ public class UpdateOrder : ICarterModule
 
             return Results.Ok(response);
         })
-        .WithName("UpdateOrder")
         .RequireAuthorization()
         .Produces<UpdateOrderResponse>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .WithSummary("Update Order")
-        .WithDescription("Update Order");
+        .ProducesProblem(StatusCodes.Status400BadRequest);
     }
 }

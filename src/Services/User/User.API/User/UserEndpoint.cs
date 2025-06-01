@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using User.API.Common;
 using User.API.Dtos;
 using User.API.Helpers;
 using User.API.Models;
@@ -288,15 +289,13 @@ public class UserEndpoint : ICarterModule
         // Lấy danh sách người dùng
         app.MapGet("/users", async (IDocumentSession session, HttpContext context) =>
         {
-            // Kiểm tra quyền admin (tùy chọn)
             var roleId = context.User.FindFirstValue("roleId");
-            if (roleId != "admin-role-id") return Results.Forbid(); // Giả sử "admin-role-id" là RoleId của admin
+            if (roleId != Constants.AdminRoleId) return Results.Forbid();
 
             var users = await session.Query<Models.User>()
                                     .Where(u => u.IsActive)
                                     .ToListAsync();
 
-            // Chuyển thành DTO để trả về
             var userDtos = users.Select(user => new
             {
                 Id = user.Id,
@@ -309,6 +308,7 @@ public class UserEndpoint : ICarterModule
                 Gender = user.Gender,
                 Age = user.Age,
                 RoleId = user.RoleId,
+                IsActive = user.IsActive,
                 CreatedDate = user.CreatedDate,
                 ModifiedDate = user.ModifiedDate
             });

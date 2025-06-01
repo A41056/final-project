@@ -13,11 +13,8 @@ namespace Ordering.API.Endpoints
                 var result = await sender.Send(new GetOrderStatsQuery(request.Range));
                 return Results.Ok(result);
             })
-            .WithName("GetOrderStats")
             .RequireAuthorization()
-            .Produces<OrderStatsDto>(StatusCodes.Status200OK)
-            .WithSummary("Get order statistics for dashboard")
-            .WithDescription("Returns total orders, sales, change %, and chart data by date");
+            .Produces<OrderStatsDto>(StatusCodes.Status200OK);
         }
     }
 }

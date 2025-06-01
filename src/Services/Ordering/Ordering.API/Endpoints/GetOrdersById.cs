@@ -16,12 +16,9 @@ public class GetOrdersById : ICarterModule
 
             return Results.Ok(response);
         })
-        .WithName("GetOrdersById")
         .RequireAuthorization()
         .Produces<GetOrdersByIdResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status404NotFound)
-        .WithSummary("Get Orders By ID")
-        .WithDescription("Get Orders By ID");
+        .ProducesProblem(StatusCodes.Status404NotFound);
     }
 }
