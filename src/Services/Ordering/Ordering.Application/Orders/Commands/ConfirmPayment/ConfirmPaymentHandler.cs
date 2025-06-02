@@ -9,12 +9,12 @@ namespace Ordering.Application.Orders.Commands.ConfirmPayment;
 public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentCommand, ConfirmPaymentResult>
 {
     private readonly IPaymentFactory _paymentFactory;
-    private readonly IApplicationDbContext _dbContext; // Thay _session bằng _dbContext
+    private readonly IApplicationDbContext _dbContext;
     private readonly ILogger<ConfirmPaymentCommandHandler> _logger;
 
     public ConfirmPaymentCommandHandler(
         IPaymentFactory paymentFactory,
-        IApplicationDbContext dbContext, // Thêm IApplicationDbContext
+        IApplicationDbContext dbContext,
         ILogger<ConfirmPaymentCommandHandler> logger)
     {
         _paymentFactory = paymentFactory;
@@ -87,7 +87,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
                 confirmResponse.PaymentContent);
         }
 
-        // Sử dụng IApplicationDbContext để truy vấn Order
         var orderId = OrderId.Of(transactionId);
         var order = await _dbContext.Orders
             .Include(o => o.OrderItems)
@@ -154,7 +153,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
             await UpdateOrderStatus(order, EOrderStatus.Failed);
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken); // Sử dụng EF Core SaveChangesAsync
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new ConfirmPaymentResult(
             confirmResponse.RspCode == Constants.VnPayResponseCode.TransactionSuccessfully ? Constants.VnPayResponseCode.TransactionSuccessfully : confirmResponse.RspCode,
@@ -173,7 +172,9 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
             order.OrderCode, confirmResponse.TransactionId, confirmResponse.TransactionNo);
 
         await UpdateOrderStatus(order, Domain.Enums.EOrderStatus.Completed);
-        order.PayDate = confirmResponse.PayDate ?? DateTime.UtcNow;
+        order.PayDate = confirmResponse.PayDate.HasValue
+            ? confirmResponse.PayDate.Value.ToUniversalTime()
+            : DateTime.UtcNow;
         order.TransactionId = Guid.Parse(confirmResponse.TransactionId);
 
         await NotifyExternalServices(order);
@@ -190,9 +191,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
     private async Task NotifyExternalServices(Order order)
     {
         _logger.LogInformation("Notifying external services for OrderCode={OrderCode}", order.OrderCode);
-        // Placeholder: Publish events for Catalog (stock), Invoice, etc.
-        // Example:
-        // await _eventBus.Publish(new OrderConfirmedEvent(order.OrderCode, order.OrderItems));
         await Task.CompletedTask;
     }
 }

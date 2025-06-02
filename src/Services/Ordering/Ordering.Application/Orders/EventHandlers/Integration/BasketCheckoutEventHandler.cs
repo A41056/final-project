@@ -27,7 +27,6 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
         _httpClientFactory = httpClientFactory;
         _publishEndpoint = publishEndpoint;
     }
-
     public async Task Consume(ConsumeContext<BasketCheckoutEvent> context)
     {
         _logger.LogInformation("Processing BasketCheckoutEvent for UserId: {UserId}", context.Message.UserId);
@@ -56,8 +55,8 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             PaymentUrl = paymentUrl
         };
 
-        await _publishEndpoint.Publish(paymentUrlEvent, context.CancellationToken);
         _logger.LogInformation("Published PaymentUrlCreatedEvent for OrderId: {OrderId}", result.Id);
+        await _publishEndpoint.Publish(paymentUrlEvent, context.CancellationToken);
     }
 
     private async Task<CreateOrderCommand> MapToCreateOrderCommand(BasketCheckoutEvent message, List<BasketItem> products)

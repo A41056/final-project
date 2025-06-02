@@ -95,7 +95,7 @@ public class UserEndpoint : ICarterModule
         app.MapPost("/refresh-token", async (RefreshTokenDto dto, IDocumentSession session, IConfiguration config) =>
         {
             var user = await session.Query<Models.User>()
-                .FirstOrDefaultAsync(u => u.Email == dto.Email && u.RefreshToken == dto.RefreshToken);
+                .FirstOrDefaultAsync(u => u.RefreshToken == dto.RefreshToken);
 
             if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
                 return Results.Unauthorized();
@@ -333,7 +333,7 @@ public class UserEndpoint : ICarterModule
             issuer: config["Jwt:Issuer"],
             audience: config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddMinutes(2),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

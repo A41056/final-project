@@ -17,8 +17,8 @@ builder.Services.AddMarten(options =>
     options.Schema.For<User.API.Models.User>();
 });
 
-if (builder.Environment.IsDevelopment())
-    builder.Services.InitializeMartenWith<UserInitialData>();
+//if (builder.Environment.IsDevelopment())
+//    builder.Services.InitializeMartenWith<UserInitialData>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = jwtSettings["Key"];

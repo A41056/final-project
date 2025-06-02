@@ -48,8 +48,11 @@ public class CheckoutBasketCommandHandler : ICommandHandler<CheckoutBasketComman
         eventMessage.TotalPrice = basket.TotalPrice;
 
         var userId = command.BasketCheckoutDto.UserId.ToString();
+
+        Console.WriteLine($"[Register] Register PaymentUrlCreatedEvent for user {userId}");
         var paymentUrlTcs = PaymentUrlCreatedEventConsumer.RegisterPaymentUrlTask(userId);
 
+        Console.WriteLine($"[Publish] Publish BasketCheckoutEvent for user {userId}");
         await _publishEndpoint.Publish(eventMessage, cancellationToken);
 
         var timeoutTask = Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);

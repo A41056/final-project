@@ -68,8 +68,8 @@ builder.Services.AddMarten(opts =>
 
 }).UseLightweightSessions();
 
-if (builder.Environment.IsDevelopment())
-    builder.Services.InitializeMartenWith<CatalogInitialData>();
+//if (builder.Environment.IsDevelopment())
+//    builder.Services.InitializeMartenWith<CatalogInitialData>();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<CatalogCustomExceptionHandler>();
