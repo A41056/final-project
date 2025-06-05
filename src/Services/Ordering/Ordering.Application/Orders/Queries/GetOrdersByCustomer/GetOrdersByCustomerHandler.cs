@@ -6,9 +6,10 @@ public class GetOrdersByCustomerHandler(IApplicationDbContext dbContext)
     {
         var orders = await dbContext.Orders
             .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.VariantProperties)
             .AsNoTracking()
             .Where(o => o.CustomerId == CustomerId.Of(query.CustomerId))
-            .OrderBy(o => o.CreatedAt)
+            .OrderByDescending(o => o.LastModified)
             .ToListAsync(cancellationToken);
 
         return new GetOrdersByCustomerResult(orders.ToOrderDtoList());

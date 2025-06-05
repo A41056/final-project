@@ -18,6 +18,7 @@ public class ProductVariant
 {
     public List<VariantProperty> Properties { get; set; } = new();
     public decimal Price { get; set; }
+    public decimal? DiscountPrice { get; set; }
     public int StockCount { get; set; }
 }
 

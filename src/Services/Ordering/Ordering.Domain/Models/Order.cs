@@ -55,13 +55,15 @@ public class Order : Aggregate<OrderId>
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(price);
 
         var orderItem = new OrderItem(Id, productId, quantity, price);
+
         if (variantProperties != null)
         {
             foreach (var vp in variantProperties)
             {
-                orderItem.VariantProperties.ToList().Add(vp);
+                orderItem.AddVariantProperty(vp);
             }
         }
+
         _orderItems.Add(orderItem);
     }
 

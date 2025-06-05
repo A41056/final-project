@@ -10,9 +10,9 @@ using User.API.Services;
 
 namespace User.API.User;
 
-public record RegisterDto(string Username, string Email, string FirstName, string LastName, string Password, string Phone, string Address, string Gender, int Age, Guid RoleId);
+public record RegisterDto(string Username, string Email, string FirstName, string LastName, string Password, string Phone, List<string> Address, string Gender, int Age, Guid RoleId);
 public record LoginDto(string Email, string Password);
-public record UpdateUserDto(string? Username, string? Email, string? FirstName, string? LastName, string? Phone, string? Address, string? Gender, int? Age);
+public record UpdateUserDto(string? Username, string? Email, string? FirstName, string? LastName, string? Phone, List<string>? Address, string? Gender, int? Age);
 
 public class UserEndpoint : ICarterModule
 {
@@ -203,7 +203,7 @@ public class UserEndpoint : ICarterModule
         app.MapPost("/users", async (RegisterDto dto, IDocumentSession session, HttpContext context) =>
         {
             var roleId = context.User.FindFirstValue("roleId");
-            if (roleId != "admin-role-id") return Results.Forbid(); // Giả sử admin-role-id là RoleId của admin
+            if (roleId != Constants.AdminRoleId) return Results.Forbid();
 
             var (hash, salt) = HashHelper.HashPassword(dto.Password);
             var user = new Models.User
@@ -333,7 +333,7 @@ public class UserEndpoint : ICarterModule
             issuer: config["Jwt:Issuer"],
             audience: config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(2),
+            expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

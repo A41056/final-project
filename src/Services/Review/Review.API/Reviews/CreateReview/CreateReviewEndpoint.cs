@@ -1,6 +1,6 @@
 ﻿namespace Review.API.Reviews.CreateReview;
 
-public record CreateReviewRequest(Guid ProductId, Guid UserId, int Rating, string Comment);
+public record CreateReviewRequest(Guid ProductId, Guid UserId, string Username, int Rating, string Comment);
 
 public record CreateReviewResponse(Guid Id);
 

@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace Review.API.Reviews.CreateReview;
 
-public record CreateReviewCommand(Guid ProductId, Guid UserId, int Rating, string Comment)
+public record CreateReviewCommand(Guid ProductId, Guid UserId, string Username, int Rating, string Comment)
     : ICommand<CreateReviewResult>;
 public record CreateReviewResult(Guid Id);
 
@@ -32,6 +32,7 @@ internal class CreateReviewCommandHandler
             Id = Guid.NewGuid(),
             ProductId = command.ProductId,
             UserId = command.UserId,
+            UserName = command.Username,
             Rating = command.Rating,
             Comment = command.Comment,
             Created = DateTime.UtcNow,
