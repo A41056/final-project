@@ -19,7 +19,7 @@ public class UpdateReviewCommandValidator : AbstractValidator<UpdateReviewComman
     }
 }
 
-internal class UpdateReviewCommandHandler
+public class UpdateReviewCommandHandler
     (IDocumentSession session)
     : ICommandHandler<UpdateReviewCommand, UpdateReviewResult>
 {

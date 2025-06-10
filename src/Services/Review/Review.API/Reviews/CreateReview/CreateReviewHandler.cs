@@ -17,7 +17,7 @@ public class CreateReviewCommandValidator : AbstractValidator<CreateReviewComman
     }
 }
 
-internal class CreateReviewCommandHandler
+public class CreateReviewCommandHandler
     (IDocumentSession session, IPublishEndpoint publishEndpoint)
     : ICommandHandler<CreateReviewCommand, CreateReviewResult>
 {

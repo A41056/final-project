@@ -9,7 +9,7 @@ public record GetReviewByProductQuery(Guid ProductId, int? PageNumber = 1, int? 
 
 public record GetReviewByProductResult(IEnumerable<Models.Review> Reviews, int TotalItems);
 
-internal class GetReviewByProductQueryHandler(IDocumentSession session)
+public class GetReviewByProductQueryHandler(IDocumentSession session)
     : IQueryHandler<GetReviewByProductQuery, GetReviewByProductResult>
 {
     public async Task<GetReviewByProductResult> Handle(GetReviewByProductQuery query, CancellationToken cancellationToken)

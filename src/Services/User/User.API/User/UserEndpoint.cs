@@ -317,7 +317,7 @@ public class UserEndpoint : ICarterModule
         }).RequireAuthorization();
     }
 
-    private string GenerateJwtToken(Models.User user, IConfiguration config)
+    public string GenerateJwtToken(Models.User user, IConfiguration config)
     {
         var claims = new[]
         {
@@ -339,7 +339,7 @@ public class UserEndpoint : ICarterModule
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private string GenerateRandomPassword(int length)
+    public string GenerateRandomPassword(int length)
     {
         const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%";
         var random = new Random();

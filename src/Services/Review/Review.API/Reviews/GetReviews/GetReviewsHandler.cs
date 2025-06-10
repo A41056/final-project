@@ -3,7 +3,7 @@
 public record GetReviewsQuery(int? PageNumber = 1, int? PageSize = 10) : IQuery<GetReviewsResult>;
 public record GetReviewsResult(IEnumerable<Models.Review> Reviews);
 
-internal class GetReviewsQueryHandler
+public class GetReviewsQueryHandler
     (IDocumentSession session)
     : IQueryHandler<GetReviewsQuery, GetReviewsResult>
 {

@@ -11,7 +11,7 @@ public class DeleteReviewCommandValidator : AbstractValidator<DeleteReviewComman
     }
 }
 
-internal class DeleteReviewCommandHandler
+public class DeleteReviewCommandHandler
     (IDocumentSession session)
     : ICommandHandler<DeleteReviewCommand, DeleteReviewResult>
 {
