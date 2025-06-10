@@ -7,8 +7,20 @@ using Microsoft.IdentityModel.Tokens;
 using BuildingBlocks.Messaging.MassTransit;
 using System.Text;
 using Microsoft.Extensions.Options;
+using Nest;
+using Catalog.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var settings = new ConnectionSettings(new Uri("http://elasticsearch:9200"))
+    .DefaultIndex("products");
+var client = new ElasticClient(settings);
+
+builder.Services.AddSingleton<IElasticClient>(sp => {
+    var settings = new ConnectionSettings(new Uri("http://elasticsearch:9200")).DefaultIndex("products");
+    return new ElasticClient(settings);
+});
+builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = jwtSettings["Key"];

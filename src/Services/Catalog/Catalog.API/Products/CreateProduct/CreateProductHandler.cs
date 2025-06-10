@@ -1,4 +1,5 @@
 ﻿using Catalog.API.Extensions;
+using Catalog.API.Services;
 
 namespace Catalog.API.Products.CreateProduct;
 
@@ -40,7 +41,7 @@ public class ProductVariantValidator : AbstractValidator<ProductVariant>
     }
 }
 
-internal class CreateProductHandler(IDocumentSession session)
+internal class CreateProductHandler(IDocumentSession session, IElasticSearchService esService)
     : ICommandHandler<CreateProductCommand, CreateProductResult>
 {
     public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
@@ -62,6 +63,21 @@ internal class CreateProductHandler(IDocumentSession session)
 
         session.Store(product);
         await session.SaveChangesAsync(cancellationToken);
+
+        var esProduct = new ProductElasticModel
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            ImageFiles = command.ImageFiles,
+            CategoryIds = product.CategoryIds,
+            IsHot = product.IsHot,
+            IsActive = product.IsActive,
+            Tags = command.Tags.Select(x => x.NormalizeTag()).ToList(),
+            Variants = product.Variants.Select(v => v.ToElastic()).ToList(),
+            Modified = DateTime.UtcNow,
+        };
+        await esService.UpdateProductAsync(esProduct, cancellationToken);
 
         return new CreateProductResult(product.Id);
     }

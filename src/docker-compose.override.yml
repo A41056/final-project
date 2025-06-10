@@ -70,6 +70,14 @@ services:
   #     - "5438:5432"
   #   volumes:
   #     - postgres_file:/var/lib/postgresql/data/
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
 
   distributedcache:
     container_name: distributedcache
@@ -158,6 +166,7 @@ services:
     depends_on:
       # - catalogdb
       - messagebroker
+      - elasticsearch 
     ports:
       - "6009:8080"
       - "6069:8081"

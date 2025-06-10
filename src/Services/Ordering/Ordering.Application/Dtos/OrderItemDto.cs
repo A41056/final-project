@@ -4,6 +4,7 @@ public record OrderItemDto
 (
     Guid OrderId,
     Guid ProductId,
+    string ProductName,
     int Quantity,
     decimal Price,
     List<VariantPropertyDto> VariantProperties

@@ -80,6 +80,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             orderItems.Add(new OrderItemDto(
                 OrderId: orderId,
                 ProductId: item.ProductId,
+                ProductName: item.ProductName,
                 Quantity: item.Quantity,
                 Price: item.UnitPrice,
                 VariantProperties: item.VariantProperties.Select(vp => new Dtos.VariantPropertyDto
@@ -130,6 +131,7 @@ public class BasketCheckoutEventHandler : IConsumer<BasketCheckoutEvent>
             Items: message.Items.Select(i => new OrderItemDto(
                 OrderId: orderId,
                 ProductId: i.ProductId,
+                ProductName: i.ProductName,
                 Quantity: i.Quantity,
                 Price: i.UnitPrice,
                 VariantProperties: i.VariantProperties.Select(vp => new Dtos.VariantPropertyDto

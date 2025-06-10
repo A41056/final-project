@@ -52,6 +52,7 @@ public class CreateOrderHandler(IApplicationDbContext dbContext)
 
             newOrder.Add(
                 ProductId.Of(orderItemDto.ProductId),
+                orderItemDto.ProductName,
                 orderItemDto.Quantity,
                 orderItemDto.Price,
                 variantProperties);

@@ -16,6 +16,9 @@ services:
   # filedb:
   #   image: postgres
 
+  elasticsearch:
+    image: elasticsearch
+
   distributedcache:
     image: redis
 

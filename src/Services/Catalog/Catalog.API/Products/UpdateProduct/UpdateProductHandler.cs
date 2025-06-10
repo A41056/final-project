@@ -1,5 +1,6 @@
 ﻿using Catalog.API.Extensions;
 using Catalog.API.Products.CreateProduct;
+using Catalog.API.Services;
 
 namespace Catalog.API.Products.UpdateProduct;
 
@@ -19,7 +20,7 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
 }
 
 internal class UpdateProductCommandHandler
-    (IDocumentSession session)
+    (IDocumentSession session, IElasticSearchService esService)
     : ICommandHandler<UpdateProductCommand, UpdateProductResult>
 {
     public async Task<UpdateProductResult> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
@@ -43,6 +44,21 @@ internal class UpdateProductCommandHandler
 
         session.Update(product);
         await session.SaveChangesAsync(cancellationToken);
+
+        var esProduct = new ProductElasticModel
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Description = product.Description,
+            ImageFiles = command.ImageFiles,
+            CategoryIds = product.CategoryIds,
+            IsHot = product.IsHot,
+            IsActive = product.IsActive,
+            Tags = command.Tags.Select(x => x.NormalizeTag()).ToList(),
+            Variants = product.Variants.Select(v => v.ToElastic()).ToList(),
+            Modified = DateTime.UtcNow,
+        };
+        await esService.UpdateProductAsync(esProduct, cancellationToken);
 
         return new UpdateProductResult(true);
     }

@@ -16,6 +16,7 @@ public record BasketCheckoutDto
 public record BasketItemDto
 {
     public Guid ProductId { get; init; }
+    public string? ProductName { get; set; }
     public int Quantity { get; init; }
     public decimal UnitPrice { get; init; }
     public List<VariantPropertyDto> VariantProperties { get; init; } = new();

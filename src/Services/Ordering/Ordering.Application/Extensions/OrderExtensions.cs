@@ -15,6 +15,7 @@ public static class OrderExtensions
             OrderItems: order.OrderItems.Select(oi => new OrderItemDto(
                 OrderId: oi.OrderId.Value,
                 ProductId: oi.ProductId.Value,
+                ProductName: oi.ProductName,
                 Quantity: oi.Quantity,
                 Price: oi.Price,
                 VariantProperties: oi.VariantProperties.Select(vp => new VariantPropertyDto
@@ -45,6 +46,7 @@ public static class OrderExtensions
             OrderItems: order.OrderItems.Select(oi => new OrderItemDto(
                 OrderId: oi.OrderId.Value,
                 ProductId: oi.ProductId.Value,
+                ProductName: oi.ProductName,
                 Quantity: oi.Quantity,
                 Price: oi.Price,
                 VariantProperties: oi.VariantProperties.Select(vp => new VariantPropertyDto

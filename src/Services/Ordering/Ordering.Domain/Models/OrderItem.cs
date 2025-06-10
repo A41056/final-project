@@ -7,21 +7,22 @@ public class OrderItem : Entity<OrderItemId>
 
     public OrderId OrderId { get; private set; } = default!;
     public ProductId ProductId { get; private set; } = default!;
+    public string? ProductName { get; set; } = default!;
     public int Quantity { get; private set; } = default!;
     public decimal Price { get; private set; } = default!;
 
-    internal OrderItem(OrderId orderId, ProductId productId, int quantity, decimal price)
+    internal OrderItem(OrderId orderId, ProductId productId, string productName, int quantity, decimal price)
     {
         Id = OrderItemId.Of(Guid.NewGuid());
         OrderId = orderId;
         ProductId = productId;
+        ProductName = productName;
         Quantity = quantity;
         Price = price;
     }
 
     public void AddVariantProperty(VariantProperty variantProperty)
     {
-        // Gán FK OrderItemId trước khi thêm
         variantProperty.SetOrderItemId(Id);
         _variantProperties.Add(variantProperty);
     }

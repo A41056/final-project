@@ -49,12 +49,12 @@ public class Order : Aggregate<OrderId>
         AddDomainEvent(new OrderUpdatedEvent(this));
     }
 
-    public void Add(ProductId productId, int quantity, decimal price, List<VariantProperty>? variantProperties = null)
+    public void Add(ProductId productId, string productName, int quantity, decimal price, List<VariantProperty>? variantProperties = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(price);
 
-        var orderItem = new OrderItem(Id, productId, quantity, price);
+        var orderItem = new OrderItem(Id, productId, productName, quantity, price);
 
         if (variantProperties != null)
         {
