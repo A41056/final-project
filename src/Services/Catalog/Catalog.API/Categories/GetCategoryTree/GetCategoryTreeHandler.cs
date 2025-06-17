@@ -3,7 +3,7 @@
 public record CategoryDto(Guid Id, string Name, string? Slug, List<CategoryDto> Subcategories);
 public record GetCategoryTreeQuery() : IQuery<List<CategoryDto>>;
 
-internal class GetCategoryTreeHandler(IDocumentSession session)
+public class GetCategoryTreeHandler(IDocumentSession session)
     : IQueryHandler<GetCategoryTreeQuery, List<CategoryDto>>
 {
     public async Task<List<CategoryDto>> Handle(GetCategoryTreeQuery query, CancellationToken cancellationToken)

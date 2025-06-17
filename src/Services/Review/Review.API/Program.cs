@@ -72,6 +72,7 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
 var app = builder.Build();
 app.UseCors("AllowAll");
 // Middleware theo thứ tự đúng

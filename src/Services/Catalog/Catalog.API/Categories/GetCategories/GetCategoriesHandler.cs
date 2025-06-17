@@ -3,7 +3,7 @@
 public record GetCategoriesQuery(int? PageNumber = 1, int? PageSize = 10) : IQuery<GetCategoriesResult>;
 public record GetCategoriesResult(IEnumerable<Category> Categories);
 
-internal class GetCategoriesQueryHandler
+public class GetCategoriesQueryHandler
     (IDocumentSession session)
     : IQueryHandler<GetCategoriesQuery, GetCategoriesResult>
 {
