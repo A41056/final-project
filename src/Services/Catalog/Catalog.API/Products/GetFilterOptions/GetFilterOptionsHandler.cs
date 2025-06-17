@@ -33,7 +33,7 @@
 
             var prices = products
                 .SelectMany(p => p.Variants)
-                .Select(v => v.Price)
+                .Select(v => v.DiscountPrice)
                 .ToList();
 
             var properties = new Dictionary<string, List<string>>();
@@ -63,7 +63,7 @@
             var minPrice = prices.Count > 0 ? prices.Min() : 0;
             var maxPrice = prices.Count > 0 ? prices.Max() : 0;
 
-            return new FilterOptionsResult(tags, minPrice, maxPrice, properties);
+            return new FilterOptionsResult(tags, minPrice.GetValueOrDefault(), maxPrice.GetValueOrDefault(), properties);
         }
     }
 }
